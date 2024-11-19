@@ -1,0 +1,20 @@
+
+#' Example Gene Annotation Data File
+#'
+#' The file has an example annotation data of 420 genes (same set of genes in the gene expression data file) directly retrieved from Ensembl BioMart database using get.ensembl.annotation function and "Human-GRCh37" as a genome assembly option (hg19).
+#'
+#' @format ## `hg19.gene.annotation`
+#' A data frame with 420 rows and 9 columns:
+#' \describe{
+#'   \item{gene}{Column has the gene ensembl ID}
+#'   \item{chrom}{The chromosome on which the gene is located}
+#'   \item{loc.start}{Gene start position in base pairs}
+#'   \item{loc.end}{Gene end position in base pairs}
+#'   \item{description}{Description of the gene name }
+#'   \item{gene.name}{Gene symbol}
+#'   \item{biotype}{Gene classes that include protein coding genes, long noncoding RNAs (lncRNAs), microRNAs (miRNAs), small nuclear RNAs (snRNA), small nucleolar RNAs (snoRNA), immunoglobulins (IGs), T-cell receptors (TCRs) and pseudogens.}
+#'   \item{chrom.strand}{The chromosome strand on which the gene is located forward (1) or reverse (-1).}
+#'   \item{chrom.band}{The chromosome band on which the gene is located.}
+#' }
+#' @source Data was directly retrieved from Ensembl BioMart database using get.ensembl.annotation function and "Human-GRCh37" as a genome assembly option (hg19).
+"hg19.gene.annotation"
