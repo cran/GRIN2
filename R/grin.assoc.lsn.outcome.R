@@ -2,19 +2,29 @@
 #' Associate Lesions with Clinical Outcomes
 #'
 #' @description
-#' The function run association analysis between the binary lesion matrix (output of prep.binary.lsn.mtx function) and clinical outcomes of interest such as Minimal Residual Disease (MRD), Event-free Survival (EFS) and Overall Survival (OS), etc...
+#' Performs statistical association analysis between binary gene-lesion events and clinical outcomes of interest, including binary outcomes (e.g., Minimal Residual Disease (MRD)) and time-to-event outcomes (e.g., Event-Free Survival (EFS), and Overall Survival (OS)). The function supports both univariate and covariate-adjusted logistic regression and Cox proportional hazards models.
 #'
-#' @param lsn.mtx Binary lesion matrix in which each type of lesions affecting certain gene is represented in a separate row for example ENSG00000148400_gain. If the gene is affected by this specific type of lesion, patient entry will be coded as 1 or 0 otherwisw. This matrix is the output of the prep.binary.lsn.mtx function.
-#' @param clin.data Clinical data table in which the first column "ID" should has the patient ID.
-#' @param annotation.data Gene annotation data either provided by the user or retrieved from ensembl BioMart database using get.ensembl.annotation function included in the GRIN2.0 library. Data.frame should has four columns: "gene" which is the ensembl ID of annotated genes, "chrom" which is the chromosome on which the gene is located, "loc.start" which is the gene start position, and "loc.end" the gene end position.
-#' @param clinvars Clinical outcome variables of interest (survival variables such as EFS and OS should be first coded as survival objects using Surv function and added as new columns to the clinical data file, binary variables such as MRD should be coded as 0, 1).
-#' @param covariate Covariates that the model will adjust for if any.
+#' @param lsn.mtx A binary lesion matrix where each row represents a unique gene-lesion pair (e.g., \code{ENSG00000148400_gain}). Each column represents a patient. Values are denoted as \code{1} if the patient harbors the specified lesion, and \code{0} otherwise. This matrix is typically produced using the \code{\link{prep.binary.lsn.mtx}} function.
+#' @param clin.data A clinical data \code{data.frame}, where the first column \code{"ID"} represent patient identifiers matching those in \code{lsn.mtx}.
+#' @param annotation.data A gene annotation \code{data.frame}, either provided by the user or retrieved using the \code{\link{get.ensembl.annotation}} function. Must include the columns: \code{"gene"} (Ensembl ID), \code{"chrom"} (chromosome), \code{"loc.start"} (gene start position), and \code{"loc.end"} (gene end position).
+#' @param clinvars A character vector of clinical outcome variables to analyze. Binary variables (e.g., MRD) should be coded as \code{0} (negative) and \code{1} (positive). Survival outcomes (e.g., EFS, OS) must be precomputed using the \code{\link[survival]{Surv}} function and added as new columns to \code{clin.data}.
+#' @param covariate Optional. A character vector specifying covariates to include as model adjustments (e.g., risk group, age, gender, etc...).
 #'
 #' @details
-#' The function run association analysis between the binary lesion matrix in which each type of lesions affecting certain gene is represented in a separate row (output of prep.binary.lsn.mtx function) and clinical outcomes.Function will run logistic regression models for association between each gene-lesion pair with numeric variables such as MRD that should be coded as 0 if the patient is MRD-negative and 1 if the patient is MRD positive. Function will also run COX-Proportional hazard models for association between lesions and survival objects such as Event-free survival (EFS) and oveall survival (OS). EFS and OS should be first coded as survival objects using Surv function and added as new columns to the clinical data file. If specified, the models can be also adjusted for one or a group of covariates such as risk group assignment, gender, age, etc...
+#' For each gene-lesion pair in the binary lesion matrix, the function can performs:
+#' \itemize{
+#'   \item \strong{Logistic regression} for binary outcomes (e.g., MRD), producing odds ratios (OR), 95_confidence intervals (CI), p-values, and FDR-adjusted q-values.
+#'   \item \strong{Cox proportional hazards models} for survival outcomes (e.g., EFS, OS), producing hazard ratios (HR), 95\% CI, p-values, and FDR-adjusted q-values.
+#' }
+#' Models can optionally be adjusted for covariates such as clinical or demographic factors. Summary counts of patients with and without lesions, stratified by outcome status, are also included in the output.
 #'
 #' @return
-#' Function returns a results table that has gene annotation data, and multiple columns showing results of the logistic regression model for association with binary variables such as MRD that include odds.ratio, lower and upper 95 confidence interval (CI), model p and FDR adjusted q values, in addition to the number of patients with/without lesion who experienced or did not experience the event. Results table will also include results of COXPH models for association between lesions with survival variables such as EFS, OS that include COXPH hazard ratio, lower and upper 95 CI, model p and FDR adjusted q values, in addition to the number of patients with/without the lesion who experienced or did not experience the event.
+#' A results \code{data.frame} containing gene annotation and association statistics for each gene-lesion pair across the specified clinical outcomes. The output includes:
+#' \itemize{
+#'   \item Odds ratio (OR), lower and upper 95CI, p-value, and q-value (FDR) for logistic regression models.
+#'   \item Hazard ratio (HR), lower and upper 95CI, p-value, and q-value for Cox proportional hazards models.
+#'   \item Patient counts for those with and without lesions, and corresponding outcome event statuses.
+#' }
 #'
 #' @export
 #'
@@ -24,45 +34,44 @@
 #' @importFrom utils head
 #'
 #' @references
-#' Andersen, P. and Gill, R. (1982). Cox's regression model for counting processes, a large sample study.
+#' Andersen, P. K., & Gill, R. D. (1982). Cox's regression model for counting processes: A large sample study.
 #'
-#' Therneau, T., Grambsch, P. (2000) Modeling Survival Data: Extending the Cox Model.
+#' Therneau, T. M., & Grambsch, P. M. (2000). \emph{Modeling Survival Data: Extending the Cox Model}.
 #'
-#' Dobson, A. J. (1990) An Introduction to Generalized Linear Models.
+#' Dobson, A. J. (1990). \emph{An Introduction to Generalized Linear Models}.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [stats::glm()], [survival::coxph()]
+#' @seealso \code{\link{prep.binary.lsn.mtx}}, \code{\link[survival]{coxph}}, \code{\link[stats]{glm}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(clin.data)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(clin_data)
 #'
-#' # prepare lesion data and find gene lesion overlaps:
-#' gene.lsn=prep.gene.lsn.data(lesion.data, hg19.gene.annotation)
-#' gene.lsn.overlap= find.gene.lsn.overlaps(gene.lsn)
+#' # Step 1: Prepare gene-lesion overlap
+#' gene.lsn <- prep.gene.lsn.data(lesion_data, hg38_gene_annotation)
+#' gene.lsn.overlap <- find.gene.lsn.overlaps(gene.lsn)
 #'
-#' # Prepare a binary lesion matrix for genes affected by a certain type of lesion in at least
-#' # 5 subjects using prep.binary.lsn.mtx function:
-#' lsn.binary.mtx=prep.binary.lsn.mtx(gene.lsn.overlap, min.ngrp=5)
+#' # Step 2: Create a binary lesion matrix (minimum 5 patients per lesion)
+#' lsn.binary.mtx <- prep.binary.lsn.mtx(gene.lsn.overlap, min.ngrp = 5)
 #'
-#' # Prepare EFS and OS survival objects and add two new columns to the clinical data file:
+#' # Step 3: Create survival objects and add to clinical data
 #' library(survival)
-#' clin.data$EFS <- Surv(clin.data$efs.time, clin.data$efs.censor)
-#' clin.data$OS <- Surv(clin.data$os.time, clin.data$os.censor)
-#' # define clinical outcome variables to be included in the analysis:
-#' clinvars=c("MRD.binary", "EFS", "OS")
+#' clin_data$EFS <- Surv(clin_data$efs.time, clin_data$efs.censor)
+#' clin_data$OS <- Surv(clin_data$os.time, clin_data$os.censor)
 #'
-#' # Run association analysis between lesions in the binary lesion matrix and clinical variables
-#' # in the clinvars object:
-#' assc.outcomes=grin.assoc.lsn.outcome(lsn.binary.mtx,
-#'                                      clin.data,
-#'                                      hg19.gene.annotation,
-#'                                      clinvars)
+#' # Step 4: Specify outcomes of interest
+#' clinvars <- c("MRD.binary", "EFS", "OS")
 #'
-#' # to adjust the models for one or a group of covariates, user can specify one or a group
-#' # of covariates using the 'covariate' argument.
+#' # Step 5: Run association analysis
+#' assc.outcomes <- grin.assoc.lsn.outcome(lsn.binary.mtx,
+#'                                         clin_data,
+#'                                         hg38_gene_annotation,
+#'                                         clinvars)
+#'
+#' # Optional: Adjust for covariates using the 'covariate' argument
 
 grin.assoc.lsn.outcome=function(lsn.mtx,            # output of prep.binary.lsn.mtx function, each lesion affecting a gene is represented in a separate row and patient will be coded as 1 if he/she is affected with the lesion and 0 otherwise
                                 clin.data,          # clinical data table. First column "ID" has patient IDs and each row is a patient clinical data

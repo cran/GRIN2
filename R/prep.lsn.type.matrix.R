@@ -2,42 +2,53 @@
 #' Prepare Lesion Type Matrix
 #'
 #' @description
-#' The function prepare a lesion matrix with all types of lesions affecting certain gene as a row and each patient as a column.
+#' Constructs a matrix that summarizes the type(s) of lesions affecting each gene across patients. Each row represents a gene, and each column represents a patient.
 #'
-#' @param ov.data list of six data.frames that represent the output results of the find.gene.lsn.overlaps function.
-#' @param min.ngrp if specified, rows with number of patients affected by all different types of lesions that's less than the specified number will be discarded (default is 0; will return all genes affected by any type of lesions in at least one patient).
+#' @param ov.data A list of six \code{data.frame} objects returned by the \code{\link{find.gene.lsn.overlaps}} function, containing gene-lesion overlap results.
+#' @param min.ngrp Optional integer specifying the minimum number of patients that must be affected by any lesion in a given gene for that gene to be retained in the final matrix. The default is \code{0}, which includes all genes affected by any lesion in at least one patient.
 #'
 #' @details
-#' The function returns a lesion matrix with each row as a gene and each column is a patient. If a gene is affected by one type of lesions in a certain patient, the entry will be labelled by lesion type (for example: gain OR mutation). However, if the same gene is affected by more than one type of lesions in a certain patient (for example: gain AND mutation), the entry will be labelled as "multiple". If the gene is not affected by any lesion, the entry for this patient will be labelled as "none".
+#' This function produces a matrix with genes as rows and patients as columns. For each gene-patient pair:
+#' \itemize{
+#'   \item If the patient has no lesion in the gene, the entry is \code{"none"}.
+#'   \item If the gene is affected by exactly one type of lesion in the patient (e.g., gain OR mutation), the entry is labeled with the corresponding lesion type.
+#'   \item If the gene is affected by more than one lesion type in the patient (e.g., gain AND mutation), the entry is labeled as \code{"multiple"}.
+#' }
+#'
+#' Genes affected in fewer than \code{min.ngrp} patients across all lesion types will be excluded if \code{min.ngrp > 0}.
 #'
 #' @return
-#' The function returns a lesion matrix with all types of lesions affecting certain gene as a row and each patient as a column.
+#' A character matrix where:
+#' \itemize{
+#'   \item Rows correspond to genes (identified by Ensembl gene IDs).
+#'   \item Columns correspond to patient IDs.
+#'   \item Entries are \code{"none"}, a specific lesion type (e.g., \code{"gain"}, \code{"mutation"}), or \code{"multiple"}.
+#' }
 #'
 #' @export
 #'
 #' @references
-#' Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+#' Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 #'
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [prep.gene.lsn.data()], [find.gene.lsn.overlaps()]
+#' @seealso \code{\link{prep.gene.lsn.data}}, \code{\link{find.gene.lsn.overlaps}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
 #'
-#' # prepare gene and lesion data for later computations:
-#' prep.gene.lsn=prep.gene.lsn.data(lesion.data,
-#'                                  hg19.gene.annotation)
+#' # 1) Prepare gene and lesion data:
+#' prep.gene.lsn <- prep.gene.lsn.data(lesion_data, hg38_gene_annotation)
 #'
-#' # determine lesions that overlap each gene (locus):
-#' gene.lsn.overlap=find.gene.lsn.overlaps(prep.gene.lsn)
+#' # 2) Identify gene-lesion overlaps:
+#' gene.lsn.overlap <- find.gene.lsn.overlaps(prep.gene.lsn)
 #'
-#' # prepare the lesion matrix with a minimum of 5 patients affected by any type of lesion in the
-#' # gene to be included in the final matrix
-#' lsn.type.mtx=prep.lsn.type.matrix(gene.lsn.overlap, min.ngrp=5)
+#' # 3) Create lesion type matrix for genes affected in >= 5 patients:
+#' lsn.type.mtx <- prep.lsn.type.matrix(gene.lsn.overlap, min.ngrp = 5)
 
 prep.lsn.type.matrix=function(ov.data,    # output of the find.gene.lsn.overlaps function
                               min.ngrp=0) # if specified, genes with number of patients affected by all different types of lesions that's less than the specified number will be discarded (default is 0; will return all genes affected by any type of lesions in at least one patient).

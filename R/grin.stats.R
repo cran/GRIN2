@@ -1,55 +1,85 @@
 
-#' GRIN Statistics Output
+#' Execute GRIN Statistical Framework
 #'
 #' @description
-#' The function run the Genomic Random Interval (GRIN) analysis to determine whether a certain locus has an abundance of lesions or a constellation of multiple types of lesions that is statistically significant.
+#' Executes the Genomic Random Interval (GRIN) statistical framework to determine whether a specific genomic locus (gene or regulatory region) is significantly affected by either individual or a constellation of multiple lesion types.
 #'
-#' @param lsn.data data.frame with lesion data prepared by the user in a GRIN compatible format. Object should has five columns that include "ID" with patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion category for example gain, loss, mutation, fusion, etc... For Single Nucleotide Variants (SNVs), loc.start will be the same as loc.end. For Copy Number Alterations (CNAs) such as gain and deletions, loc.start and loc.end should be the gain or deletion start and end positions respectively. For structural rearrangements such as inversions and translocations, each rearrangement should be coded in two different lines, one line for chromosome A involved in the translocation break-point and the second line for chromosome B break-point. For inversions on the same chromosome, the two lines will include the two breakpoints of the inversion. An example lesion data in a GRIN compatible format can be found at the GRIN2.0 package data folder (lesion.data.rda).
-#' @param gene.data data.frame with the gene annotation data either provided by the user or directly retreived from ensembl BioMart database using get.ensembl.annotation function included in the GRIN2.0 library if the genome.version is specified. Object should has four columns "gene" which is the ensembl ID of annotated genes to which the lesion data will be overlapped, "chrom" which is the chromosome on which the gene is located, "loc.start" which is the gene start position, and "loc.end" the gene end position.
-#' @param chr.size data.frame with the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs. It should has two columns that include "chrom" with the chromosome number and "size" for the size of the chromosome in base pairs. Chromosome size data can be either provided by the user or directly retreived from UCSC genome browser using get.chrom.length function included in the GRIN2.0 library if genome.version is specified.
-#' @param genome.version Genome assembly should be only specified if the user selected not to provide gene annotation, chromosome size files, and directly retrieve those files from ensembl BioMart database, and UCSC genome browsers using get.ensembl.annotation and get.chrom.length functions respectively. Currently, the function support four genome assemblies that include "Human_GRCh38", "Human_GRCh37", "Mouse_HGCm39", and "Mouse_HGCm38".
+#' @param lsn.data A `data.frame` containing lesion data formatted for GRIN analysis. It must include the following five columns:
+#'   \itemize{
+#'     \item{\code{ID}}: Sample or patient identifier.
+#'     \item{\code{chrom}}: Chromosome on which the lesion is located.
+#'     \item{\code{loc.start}}: Genomic start coordinate of the lesion.
+#'     \item{\code{loc.end}}: Genomic end coordinate of the lesion.
+#'     \item{\code{lsn.type}}: Lesion type (e.g., gain, loss, mutation, fusion, etc...).
+#'   }
+#'   For Single Nucleotide Variants (SNVs), loc.start and loc.end should be the same. For Copy Number Alterations (CNAs) such as gains and deletions, these fields represent the lesion start and end positions (lesion boundary). Structural rearrangements (e.g., translocations, inversions) should be represented by two entries (two separate rows), one for each breakpoint. An example dataset is available in the GRIN2 package (`lesion_data.rda`).
+#'
+#' @param gene.data A `data.frame` containing gene annotation data. Must include the following columns:
+#'   \itemize{
+#'     \item{\code{gene}}: Ensembl gene ID.
+#'     \item{\code{chrom}}: Chromosome where the gene is located.
+#'     \item{\code{loc.start}}: Gene start position.
+#'     \item{\code{loc.end}}: Gene end position.
+#'   }
+#'   This data can be user-provided or retrieved automatically via `get.ensembl.annotation()` if \code{genome.version} is specified.
+#'
+#' @param chr.size A `data.frame` specifying chromosome sizes. Must contain:
+#'   \itemize{
+#'     \item{\code{chrom}}: Chromosome number.
+#'     \item{\code{size}}: Chromosome length in base pairs.
+#'   }
+#'   The data can be user-provided or directly retrieved using `get.chrom.length()` if \code{genome.version} is specified.
+#'
+#' @param genome.version Optional. If gene annotation and chromosome size files are not provided, users can specify a supported genome assembly to retrieve these files automatically. Currently, the package only support "Human_GRCh38" genome assembly.
 #'
 #' @details
-#' The function run the Genomic Random Interval (GRIN) analysis and evaluates the probability of each gene locus to be affected by different types of lesions based on a convolution of independent but non-identical Bernoulli distributions to determine whether this locus has an abundance of lesions that is statistically significant.In addition, FDR-adjusted q value is computed for each locus based on Pounds & Cheng (2006) estimator of the proportion of tests with a true null (pi.hat). The function also evaluates if a certain locus is affected by a constellation of multiple types of lesions and return the GRIN results table.
+#' The GRIN algorithm evaluates each locus to determine whether the observed frequency and distribution of lesions is greater than expected by chance. This is modeled using a convolution of independent, non-identical Bernoulli distributions, accounting for lesion type, locus size, and chromosome context.
+#'
+#' For each gene, the function calculates:
+#' \itemize{
+#'   \item{A p-value for the enrichment of lesion events}
+#'   \item{An FDR-adjusted q-value using the Pounds & Cheng (2006) method}
+#'   \item{Significance of multi-lesion constellation patterns (e.g., p-value for a locus being affected by 1, 2, etc., lesion types)}
+#' }
 #'
 #' @return
-#' A list with the following components:
-#' \item{gene.hits}{data table of GRIN results that include gene annotation, number of subjects affected by each lesion type for example gain, loss, mutation, etc.., and number of hits affecting each locus. The GRIN results table will also include P and FDR adjusted q-values showing the probability of each locus of being affected by one or a constellation of multiple types of lesions.}
-#' \item{lsn.data}{input lesion data}
-#' \item{gene.data}{input gene annotation data}
-#' \item{gene.lsn.data}{each row represent a gene overlapped by a certain lesion. Column "gene" shows the overlapped gene ensembl ID and "ID"" column has the patient ID.}
-#' \item{chr.size}{data table showing the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs.}
-#' \item{gene.index}{data.frame with overlapped gene-lesion data rows that belong to each chromosome in the gene.lsn.data table.}
-#' \item{lsn.index}{data.frame that shows the overlapped gene-lesion data rows taht belong to each lesion in the gene.lsn.data table.}
+#' A list containing:
+#' \item{gene.hits}{A `data.frame` of GRIN results for each gene, including annotation, subject/hit counts by lesion type, and p/q-values for individual and multi-lesion constellation significance.}
+#' \item{lsn.data}{The original lesion input data.}
+#' \item{gene.data}{The original gene annotation input data.}
+#' \item{gene.lsn.data}{A `data.frame` where each row represents a gene-lesion overlap. Includes columns \code{"gene"} (Ensembl ID) and \code{"ID"} (sample ID).}
+#' \item{chr.size}{The chromosome size reference table used in computations.}
+#' \item{gene.index}{Indexes linking genes to rows in \code{gene.lsn.data} by chromosome.}
+#' \item{lsn.index}{Indexes linking lesions to rows in \code{gene.lsn.data}.}
 #'
 #' @export
 #'
 #' @importFrom utils select.list
 #'
 #' @references
-#' Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+#' Pounds, S. et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 #'
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [prep.gene.lsn.data()], [find.gene.lsn.overlaps()], [count.hits()], [prob.hits()]
+#' @seealso \code{\link{prep.gene.lsn.data}}, \code{\link{find.gene.lsn.overlaps}}, \code{\link{count.hits}}, \code{\link{prob.hits}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #'
-#' # if gene annotation and chromosome size files will be provided by the user:
-#' grin.results=grin.stats(lesion.data,
-#'                         hg19.gene.annotation,
-#'                         hg19.chrom.size)
+#' # Example1: Run GRIN with user-supplied annotation and chromosome size:
+#' grin.results <- grin.stats(lesion_data,
+#'                            hg38_gene_annotation,
+#'                            hg38_chrom_size)
 #'
-#' # to directly retrieve gene annotation and chromosome size files from Ensembl BioMart database,
-#' # and UCSC genome browsers using get.ensembl.annotation and get.chrom.length functions respectively,
-#' # users can select to specify certain genome assembly using the 'genome.version' argument:
-#' # "Human_GRCh37" can be used for the GRCH37 (hg19) genome assembly, and "Human_GRCh38" can be used
-#' # for the GRCH38 (hg38) genome assembly
+#' # Example 2: User can specify genome version to automatically retrieve annotation
+#' # and chromosome size data:
+#' # grin.results <- grin.stats(lesion_data,
+#' #                            genome.version = "Human_GRCh38")
 
 grin.stats=function(lsn.data,            # data.frame with five columns "ID" which is the subject identifier), "chrom" which is the chromosome on which the lesion is located), "loc.start" the lesion start position, "loc.end" the lesion end position, and "lsn.type" which is the lesion category for example gain, mutation, etc..)
                     gene.data=NULL,      # data.frame with four required columns "gene" which is the gene ensembl ID, "chrom" which is the chromosome on which the gene is located, "loc.start" the gene start position, and "loc.end" which is the gene end position
@@ -59,10 +89,7 @@ grin.stats=function(lsn.data,            # data.frame with five columns "ID" whi
 {
   if (is.null(genome.version)&&(is.null(gene.data)||is.null(chr.size)))
   {
-    genome.version=utils::select.list(c("Human_GRCh38",
-                                        "Human_GRCh37",
-                                        "Mouse_HGCm39",
-                                        "Mouse_HGCm38"))
+    genome.version=utils::select.list(c("Human_GRCh38"))
   }
 
   if (is.character(genome.version))

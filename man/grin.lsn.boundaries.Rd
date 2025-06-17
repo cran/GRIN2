@@ -2,43 +2,51 @@
 % Please edit documentation in R/grin.lsn.boundaries.R
 \name{grin.lsn.boundaries}
 \alias{grin.lsn.boundaries}
-\title{GRIN Evaluate Lesion Boundaries}
+\title{GRIN Evaluation of Lesion Boundaries}
 \usage{
 grin.lsn.boundaries(lsn.data, chrom.size)
 }
 \arguments{
-\item{lsn.data}{Lesion data file that should be limited to include either gain or deletions. If gains are splitted to gain and amplifications based on the log2Ratio value of the CNV segmentation file, the two categories can be included in the same data table, same for homozygous and heterozygous deletions.}
+\item{lsn.data}{A lesion data table containing only gain or deletion events. If gains are subdivided (e.g., into gains and amplifications based on log2Ratio values), both subtypes can be included. The same applies for deletions (e.g., homozygous and heterozygous).}
 
-\item{chrom.size}{Chromosize size table that should include two columns "chrom" with the chromosome number and "size" with the chromosome size in base pairs.}
+\item{chrom.size}{A chromosome size table with two required columns: \code{"chrom"} (chromosome identifier) and \code{"size"} (chromosome size in base pairs).}
 }
 \value{
-Function return a data.frame with five columns:
-\item{gene}{Ordered boundaries by unique start and end positions of different lesions on each chromosome.}
-\item{chrom}{Chromosome on which the bounday is located.}
-\item{loc.start}{Boundary start position.}
-\item{loc.end}{Boundary end position.}
-\item{diff}{Boundary size in base pairs.}
+A \code{data.frame} with five columns:
+\item{gene}{Boundary identifier, based on unique start and end positions.}
+\item{chrom}{Chromosome on which the boundary resides.}
+\item{loc.start}{Start position of the boundary.}
+\item{loc.end}{End position of the boundary.}
+\item{diff}{Length of the boundary in base pairs.}
 }
 \description{
-The function evaluates Copy number variations that include gain and deletions as boundaries based on unique lesion start and end positions. This analysis is lesion type specific and covers the entire genome.
+This function evaluates copy number variations (CNVs), specifically gains and deletions, using unique lesion start and end positions to define genomic boundaries. The analysis is lesion-type specific and spans the entire genome.
 }
 \details{
-The function evaluates Copy number variations that include gain and deletions as boundaries and return a table of ordered boundaries based on the unique start and end positions of different lesions on each chromosome. If gains are splitted to gain and amplifications based on the log2Ratio value of the CNV segmentation file, the two categories can be included in the same analysis, same for homozygous and heterozygous deletions. Boundary will be the region between each unique start and end positions where large size lesions will be splitted into multiple boundaries based on other smaller size lesions that affect the same region in other patients if any. This analysis is meant to cover the entire genome, so regions without any annotated genes or regulatory features will be incuded will be assesed in the analysis. The first boundary for each chromosome will start from the first nucleotide base on the chromosome till the start position of the first lesion that affect the chromosome. Similarly, the last boundary will start from the end position of the last lesion that affect the chromosome till the last base on the chromosome.
+The function identifies unique CNV boundaries by evaluating the start and end positions of lesions on each chromosome. Large lesions may be split into smaller boundaries based on overlapping smaller lesions in other samples. This boundary-based approach ensures comprehensive genome-wide coverage, including intergenic regions and areas without annotated features.
+
+The first boundary on each chromosome spans from the start of the chromosome to the start of the first lesion affecting any of the included patient samples. Similarly, the last boundary extends from the end of the last lesion to the end of the chromosome.
+
+This method is particularly useful when analyzing CNV data at a finer resolution than gene-level annotation allows.
 }
 \examples{
-data(lesion.data)
-data(hg19.chrom.size)
+data(lesion_data)
+data(hg38_chrom_size)
 
-# This analysis is lesion type specific. So, user should first data extract data for a specific
-# lesion group of interest for example gains from the lesion data file:
-gain=lesion.data[lesion.data$lsn.type=="gain",]
-# Return lesion boundaries for gains:
-lsn.bound.gain=grin.lsn.boundaries(gain, hg19.chrom.size)
-# Run GRIN analysis Using Lesion Boundaries markers Instead of the gene annotation file:
-GRIN.results.gain.bound=grin.stats(gain, lsn.bound.gain, hg19.chrom.size)
+# This analysis is lesion-type specific. For example, extract gains:
+gain <- lesion_data[lesion_data$lsn.type == "gain", ]
 
-# same analysis can be done for mutations, deletions and structural rearrangments.
+# Generate lesion boundaries for gains:
+lsn.bound.gain <- grin.lsn.boundaries(gain, hg38_chrom_size)
+
+# Run GRIN using lesion boundaries as markers instead of gene annotations:
+GRIN.results.gain.bound <- grin.stats(gain, lsn.bound.gain, hg38_chrom_size)
+
+# The same analysis can be applied to deletions, mutations, or structural rearrangements.
+}
+\seealso{
+\code{\link{grin.stats}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

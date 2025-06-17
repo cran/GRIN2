@@ -1,45 +1,53 @@
 
-#' Compute Genome-wide Coordinates
+#' Compute Genome-wide Plotting Coordinates
 #'
 #' @description
-#' The function assign plotting coordinates necessary for the genome-wide lesion plot.
+#' Computes and assigns genome-wide plotting coordinates to lesion, gene, and chromosome data for use in genome-wide lesion plots.
 #'
-#' @param grin.res GRIN results (output of the grin.stats function).
-#' @param scl length of chromosome units in base pairs. Default is 1,000,000 which means that each chromosome will be divided into multiple pieces each is 1 million base pair in length.
+#' @param grin.res GRIN results, typically the output of the `grin.stats` function.
+#' @param scl Chromosome unit length in base pairs. Default is 1,000,000, meaning each chromosome is divided into segments of 1 million base pairs for plotting.
 #'
 #' @details
-#' The function divides each chromosome into multiple units based on the specified scl value. In addition, it orders and adds two columns x.start and x.end to the chromosme size file (x.start for chr2 is equal to x.end of chr1). Function also adds x.start and x.end columns to lesion and gene annotation data files (x.start is the start position of the lesion or the gene divided by scl and x.end is the end position of the lesion or the gene divided by scl taking into consideration that the start position of the chromosomes is added consecutively based on the chromosomes length).
+#' This function processes the GRIN results to add genome-wide x-axis coordinates necessary for plotting lesions and genes across all chromosomes. It divides each chromosome into segments based on the specified `scl` value and computes cumulative start and end positions across chromosomes to ensure a continuous x-axis. Specifically:
+#' \itemize{
+#'   \item Chromosome sizes are updated to include `x.start` and `x.end` columns, where each chromosome starts where the previous one ends.
+#'   \item Gene and lesion data are similarly updated with `x.start` and `x.end` coordinates, scaled by `scl`, and adjusted for cumulative chromosome positions.
+#' }
 #'
 #' @return
-#' Function return a list of GRIN results with the following changes to allow adding genome-wide plotting coordinates:
-#' \item{gene.hits}{No changes, a data table of GRIN results that includes gene annotation, number of subjects and number of hits affecting each locus, p and FDR adjusted q-values showing the probability of each locus to be affected by one or a constellation of multiple types of lesions.}
-#' \item{gene.lsn.data}{No changes, each row represent a gene overlapped by a certain lesion. Column "gene" shows the overlapped gene ensembl ID, and ID column has the patient ID}
-#' \item{lsn.data}{input lesion data with two additional columns (x.start and x.end). x.start is the start position of the lesion divided by scl and x.end is the end position of the lesion divided by scl taking into consideration that the start position of the chromosomes is added consecutively based on the chromosomes length.}
-#' \item{gene.data}{input gene annotation data with two additional columns (x.start and x.end). x.start is the start position of the gene divided by scl and x.end is the end position of the gene divided by scl taking into consideration that the start position of the chromosomes is added consecutively based on the chromosomes length.}
-#' \item{chr.size}{data table showing the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs with two additional columns (x.start and x.end). x.start is the start position of the chromosome divided by scl and x.end is the end position of the chromosome divided by scl taking into consideration that the start position of the chromosomes is added consecutively based on the chromosomes length.}
-#' \item{gene.index}{data.frame with overlapped gene-lesion data rows that belong to each chromosome in the gene.lsn.data table.}
-#' \item{lsn.index}{data.frame that shows the overlapped gene-lesion data rows taht belong to each lesion in the gene.lsn.data table.}
+#' A list identical in structure to the original `grin.res` object, with the following additions:
+#' \describe{
+#'   \item{gene.hits}{Unchanged. GRIN gene-level summary statistics, including hit counts and p/q-values.}
+#'   \item{gene.lsn.data}{Unchanged. Gene-lesion overlaps showing which lesion affects which gene for each patient.}
+#'   \item{lsn.data}{Input lesion data with added `x.start` and `x.end` columns for genome-wide coordinates.}
+#'   \item{gene.data}{Input gene annotation data with added `x.start` and `x.end` columns for genome-wide coordinates.}
+#'   \item{chr.size}{Chromosome size table (22 autosomes + X and Y) with added `x.start` and `x.end` columns for plotting.}
+#'   \item{gene.index}{Mapping of `gene.lsn.data` rows to their corresponding chromosomes.}
+#'   \item{lsn.index}{Mapping of `gene.lsn.data` rows to their corresponding lesions.}
+#' }
 #'
 #' @export
 #'
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [grin.stats()]
+#' @seealso \code{\link{grin.stats}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #'
-#' # Run GRIN model using grin.stats function
-#' grin.results=grin.stats(lesion.data,
-#'                         hg19.gene.annotation,
-#'                         hg19.chrom.size)
-#' # assign genomewide coordinates and prepare the results for the genomewide.lsn.plot function
-#' genome.coord=compute.gw.coordinates(grin.results)
+#' # Run GRIN model
+#' grin.results <- grin.stats(lesion_data,
+#'                            hg38_gene_annotation,
+#'                            hg38_chrom_size)
+#'
+#' # Assign genome-wide coordinates for plotting
+#' genome.coord <- compute.gw.coordinates(grin.results)
 
 compute.gw.coordinates=function(grin.res,    # GRIN results (output of the grin.stats function)
                                 scl=1000000) # length of chromosome units in base pairs

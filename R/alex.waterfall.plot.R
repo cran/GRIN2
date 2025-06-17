@@ -1,18 +1,19 @@
 
-#' Prepare Waterfall Plot of Lesion and Expression Data
+#' Generate Waterfall Plot of Lesion and Expression Data
 #'
 #' @description
-#' Function return a waterfall plot for expression data by lesion groups of a selected gene.
+#' Creates a waterfall plot displaying gene expression levels grouped by lesion status for a selected gene.
 #'
-#' @param waterfall.prep Output of the alex.waterfall.prep function. It's a list of three data tables that include "gene.lsn.exp" that has patient ID, lesion type that affect this gene if any and expression level of the selected gene, "lsns" which is a data table with all lesions affecting the gene of interest in a GRIN compatible format and "stats" which is one row with the Kruskal-Wallis test result (output of the KW.hit.express function).
-#' @param lsn.data Lesion data in a GRIN compatible format.
-#' @param lsn.clrs Assigned colors per lesion types. If not specified, colors will be automatically assigned using default.grin.colors function.
-#' @param delta Spacing argument for the waterfall plot.
+#' @param waterfall.prep Output from \code{alex.waterfall.prep}. A list containing three data tables: \code{"gene.lsn.exp"} with patient IDs, lesion types, and expression levels for the gene of interest; \code{"lsns"} with all lesions affecting the gene (GRIN-compatible format); and \code{"stats"} with the Kruskal Wallis test result (from \code{KW.hit.express}).
+#' @param lsn.data Lesion data in GRIN-compatible format.
+#' @param lsn.clrs Named vector of colors for lesion types. If not provided, default colors will be automatically assigned using \code{default.grin.colors()}.
+#' @param delta Spacing argument for the waterfall plot (default is 0.5).
 #'
 #' @details
-#' Function return a waterfall plot for expression data by lesion groups of a selected gene. This plot offers a side by side graphical representation of lesion and expression data for each patient where lesion groups are ordered alphabetically. For each lesion category, expression data is ordered from the lowest to the highest with patient with the median expression of the gene in the middle of the panel.
+#' This function generates a waterfall-style plot that visualizes gene expression across patients, grouped by lesion category. Patients are grouped by lesion type (sorted alphabetically), and within each group, expression levels are ordered from lowest to highest. The median expression level appears at the center of each group, allowing intuitive comparison between lesion categories.
 #'
-#' @return Function return a waterfall plot for expression data by lesion groups of a selected gene.
+#' @return
+#' A side-by-side graphical representation of lesion status and gene expression for each patient, grouped by lesion type.
 #'
 #' @export
 #'
@@ -22,28 +23,28 @@
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [alex.prep.lsn.expr()], [KW.hit.express()], [alex.waterfall.prep()]
+#' @seealso \code{\link{alex.prep.lsn.expr}}, \code{\link{KW.hit.express}}, \code{\link{alex.waterfall.prep}}
 #'
 #' @examples
-#' data(expr.data)
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
+#' data(expr_data)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
 #'
-#' # prepare expression, lesion data and return the set of genes with both types of data available
-#' # ordered by gene IDs in rows and patient IDs in columns:
-#' alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-#'                              hg19.gene.annotation, min.expr=1, min.pts.lsn=5)
+#' # Prepare expression and lesion data
+#' alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+#'                                 hg38_gene_annotation, min.expr = 1, min.pts.lsn = 5)
 #'
-#' # run KW test for association between lesion groups and expression level of the same gene:
-#' alex.kw.results=KW.hit.express(alex.data, hg19.gene.annotation, min.grp.size=5)
+#' # Run Kruskal Wallis test
+#' alex.kw.results <- KW.hit.express(alex.data, hg38_gene_annotation, min.grp.size = 5)
 #'
-#' # To prepare lesion and expression data for a waterfall plot (WT1 gene):
-#' WT1.waterfall.prep=alex.waterfall.prep(alex.data, alex.kw.results, "WT1", lesion.data)
+#' # Prepare data for the WT1 gene
+#' WT1.waterfall.prep <- alex.waterfall.prep(alex.data, alex.kw.results, "WT1", lesion_data)
 #'
-#' # waterfall plot of WT1 gene:
-#' WT1.waterfall.plot=alex.waterfall.plot(WT1.waterfall.prep, lesion.data)
+#' # Generate waterfall plot for WT1
+#' alex.waterfall.plot(WT1.waterfall.prep, lesion_data)
 
 alex.waterfall.plot=function(waterfall.prep,   # Output of the alex.waterfall.prep function
                              lsn.data,         # Lesion data in a GRIN compatible format

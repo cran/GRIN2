@@ -1,42 +1,44 @@
 
-#' Prepare Lesion and Expression Data for Kruskal-Wallis Test
-#' @description
-#' The function prepares lesion and expression data matrices for the KW.hit.express function that runs the kruskal-Wallis test for the association between lesion groups and expression level of each gene with available lesion and expression data.
+#' Prepare Lesion and Expression Data for Kruskal Wallis Test
 #'
-#' @param expr.mtx Normalized log2 transformed expression data provided by the user with genes in rows and subjects in columns (first column "ensembl.ID" should be gene ensembl IDs).
-#' @param lsn.data Lesion data in GRIN compatible format. Data frame should has five columns that include "ID" with patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion type for example gain, loss, mutation, fusion, etc...
-#' @param gene.annotation Gene annotation data either provided by the user or retrieved from ensembl BioMart database using get.ensembl.annotation function included in the GRIN2.0 library. Data.frame should has four columns: "gene" which is the ensembl ID of annotated genes, "chrom" which is the chromosome on which the gene is located, "loc.start" which is the gene start position, and "loc.end" the gene end position.
-#' @param min.expr Minimum allowed expression level of the gene (the sum of expression level of the gene in all patients; useful to exclude genes with very low expression)
-#' @param min.pts.lsn Minimum number of patients with any type of lesions in a certain gene otherwise the gene will be excluded from the lesion matrix.
+#' @description
+#' Prepares matched lesion and expression data matrices for use with the \code{KW.hit.express} function, which performs Kruskal Wallis tests to assess associations between lesion groups and gene expression levels.
+#'
+#' @param expr.mtx A data frame or matrix of normalized, log2-transformed gene expression values with genes in rows and subjects in columns. The first column must be named \code{"ensembl.ID"} and contain Ensembl gene IDs.
+#' @param lsn.data A data frame of lesion data in GRIN-compatible format. Must contain five columns:
+#' \code{"ID"} (patient ID), \code{"chrom"} (chromosome), \code{"loc.start"} (lesion start position), \code{"loc.end"} (lesion end position), and \code{"lsn.type"} (lesion type; e.g., gain, loss, mutation, fusion, etc..).
+#' @param gene.annotation A gene annotation data frame, either user-provided or retrieved via \code{get.ensembl.annotation()} from the GRIN2.0 package. Must contain four columns: \code{"gene"} (Ensembl gene ID), \code{"chrom"} (chromosome), \code{"loc.start"} (gene start), and \code{"loc.end"} (gene end).
+#' @param min.expr Minimum total expression level required for a gene to be retained (i.e., sum of expression values across all subjects). Useful to filter out genes with very low expression.
+#' @param min.pts.lsn Minimum number of subjects required to have a lesion in a gene for that gene to be retained for the KW test.
 #'
 #' @details
-#' The function use prep.lsn.type.matrix function to prepare the lesion matrix that has each gene represented in one row with all lesion types included. Next, the function will prepare lesion and expression data matrices for the KW.hit.express function that runs the kruskal-Wallis test. It only keep genes with both lesion and expression data with rows ordered by ensembl ID and columns ordered by patient's ID.
+#' The function uses \code{prep.lsn.type.matrix()} internally to create a lesion matrix where each gene is represented by one row and all lesion types are included. It filters genes to retain only those with both sufficient expression and lesion data. The final expression and lesion matrices are matched by gene and patient IDs, with rows ordered by Ensembl gene ID and columns by patient ID.
 #'
 #' @return
 #' A list with the following components:
-#' \item{alex.expr}{Expression data with gene ensembl IDs as row names and patient IDs as column names. Rows are ordered by ensembl ID and columns ordered by patient IDs.}
-#' \item{alex.lsn}{Lesion data for genes in the expression data matrix with gene ensembl IDs as row names and patient IDs as column names. Rows are ordered by ensembl ID and columns ordered by patient IDs.}
-#' \item{alex.row.mtch}{Data.frame of two columns with ensembl ID of genes in the expression and lesion data matrices (ID should be the same in the two columns).}
+#' \item{alex.expr}{A matrix of gene expression data with Ensembl gene IDs as row names and patient IDs as column names.}
+#' \item{alex.lsn}{A matrix of lesion data for the same genes and patients as in \code{alex.expr}, similarly ordered.}
+#' \item{alex.row.mtch}{A data frame with two columns showing the matched Ensembl gene IDs from the expression and lesion matrices.}
 #'
 #' @export
 #'
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [KW.hit.express()]
+#' @seealso \code{\link{KW.hit.express}}
 #'
 #' @examples
-#' data(expr.data)
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
+#' data(expr_data)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
 #'
-#' # prepare expression, lesion data and return the set of genes with both types of data available
-#' # ordered by gene IDs in rows and patient IDs in columns:
-#' alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-#'                              hg19.gene.annotation, min.expr=1,
-#'                              min.pts.lsn=5)
+#' # Prepare matched lesion and expression data
+#' alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+#'                                 hg38_gene_annotation, min.expr = 1,
+#'                                 min.pts.lsn = 5)
 
 alex.prep.lsn.expr=function(expr.mtx,          # Normalized log2 transformed expression data with genes in rows and subjects in columns (first column "ensembl.ID" should be gene ensembl IDs)
                             lsn.data,          # lesion data in GRIN compatible format. Data frame should has five columns that include "ID" with patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion type for example gain, loss, mutation, fusion, etc...
@@ -113,7 +115,7 @@ alex.prep.lsn.expr=function(expr.mtx,          # Normalized log2 transformed exp
 
   res=list(alex.expr=expr.mtx,      # expression data (data table with gene ensembl IDs as row names and each column is a patient)
            alex.lsn=lsn.grp.mtx,    # overlapped gene lesion data table with gene ensembl IDs as row names and each column is a patient
-           alex.row.mtch=row.mtch)  # ensembl ID for one row of the alex.lsn table to be paired with one row of the expression data for the Kruskal-Wallis test
+           alex.row.mtch=row.mtch)  # ensembl ID for one row of the alex.lsn table to be paired with one row of the expression data for the Kruskal Wallis test
 
   return(res)
 

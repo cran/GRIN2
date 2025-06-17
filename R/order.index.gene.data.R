@@ -1,29 +1,36 @@
 
-#' Order Index Gene Data
+#' Order and Index Gene Annotation Data
 #'
 #' @description
-#' This function order and index gene annotation data by chromosome on which the gene is located, gene start, and end positions.
+#' This function orders and indexes gene annotation data by chromosome, gene start, and gene end positions. It is typically used to prepare gene data for overlap analyses with lesion data.
 #'
-#' @param gene.data data.frame with gene annotation data either provided by the user or retrieved from ensembl BioMart database using get.ensembl.annotation function included in the GRIN2.0 library. data.frame should has four columns that include "gene" which is the ensembl ID of the annotated genes to which the lesion data will be overlapped, "chrom" which is the chromosome on which the gene is located, "loc.start" which is the gene start position, and "loc.end" the gene end position.
+#' @param gene.data A `data.frame` containing gene annotation information, either provided by the user or retrieved using the `get.ensembl.annotation` function from the GRIN2.0 package. The `data.frame` must contain four columns:
+#' \describe{
+#'   \item{"gene"}{Ensembl gene ID.}
+#'   \item{"chrom"}{Chromosome on which the gene is located.}
+#'   \item{"loc.start"}{Start position of the gene.}
+#'   \item{"loc.end"}{End position of the gene.}
+#' }
 #'
 #' @return
-#' A list with the following components:
-#' \item{gene.data}{Input gene annotation data}
-#' \item{gene.index}{data.frame with two columns of ordered row start and row end based on the number of genes annotated to each chromosome.}
+#' A list with two components:
+#' \item{gene.data}{The input gene annotation data, ordered by chromosome and genomic coordinates.}
+#' \item{gene.index}{A `data.frame` with two columns (`row.start` and `row.end`) indicating the row indices for genes on each chromosome.}
 #'
 #' @export
 #'
 #' @references
-#' Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+#' Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 #'
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
 #' @examples
-#' data(hg19.gene.annotation)
+#' data(hg38_gene_annotation)
 #'
-#' ordered.genes=order.index.gene.data(hg19.gene.annotation)
+#' ordered.genes <- order.index.gene.data(hg38_gene_annotation)
 
 order.index.gene.data=function(gene.data)  # gene annotation data
 {

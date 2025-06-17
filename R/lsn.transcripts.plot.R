@@ -1,93 +1,87 @@
 
-#' Lesions Gene Transcripts Plot
+#' Plot of Gene Lesions and Transcripts
 #'
 #' @description
-#' Function prepare a plot with all types of lesions that spans either a gene or a region of interest.
+#' The function can generate four types of lesion plots.
+#' (1) If the `gene` argument is specified, the function returns a gene-level plot showing all lesions affecting the gene, along with the transcript track and GRIN statistics.
+#' (2) If `chrom`, `plot.start`, and `plot.end` are specified, the function generates a locus-level plot for that genomic region, including the transcript track.
+#' If `transTrack = FALSE`, the function can return similar plots without the transcript track (useful for large regions such as chromosome bands or entire chromosomes).
+#' (3) If `lesion.grp` is specified, only lesions from that specific group will be shown in the plot.
+#' (4) If `lesion.grp` is not specified, all lesion types will be displayed for the given locus.
 #'
-#' @param grin.res GRIN results (output of the grin.stats function).
-#' @param genome either "hg19" or "hg38" genome assemblies can be specified based on the genome assembly that has been used to prepare the lesion data.
-#' @param gene Gene name of interest.
-#' @param transTrack In case of plots that span large genomic region such as a chromosome band or the whole chromosome, this argument should be specified as 'FALSE' to exclude the transcripts track from the plot.
-#' @param lsn.clrs Lesion colors for the regional gene plot (If not provided by the user, colors will be automatically assigned using default.grin.colors function).
-#' @param chrom chromosome number (should be only specified in the locus plots where plot.start and plot.end for the locus of interest are specified).
-#' @param plot.start start position of the locus of interest.
-#' @param plot.end end position of the locus of interest.
-#' @param lesion.grp lesion group of interest (should be only specified in locus plots when chrom, plot.start, plot.end are specified).
-#' @param spec.lsn.clr color assigned to the lesion of interest (should be specified when chrom, plot.start, plot.end and lesion.grp are specified).
-#' @param extend.left specified number will be used to manually align the left side of the gene transcripts track directly retrieved from ensembl database with the gene lesions track if needed.
-#' @param extend.right specified number will be used to manually align the right side of the gene transcripts track directly retrieved from ensembl database with the gene lesions track if needed.
-#' @param expand Controls ratio of the gene locus (start and end position) to the whole plot with default value = 0.0005 (setting expand=0 will only plot the gene locus from the start to the end position without any of the upstream or downstream regions of the gene).
-#' @param hg38.transcripts transcripts data retrieved from annotation hub for hg38 version 110 (should be only specified if genome="hg38").
-#' @param hg19.cytoband hg19 chromosome bands start and end data in base pair (should be only specified if genome="hg19").
-#' @param hg38.cytoband hg38 chromosome bands start and end data in base pair (should be only specified if genome="hg38").
+#' @param grin.res GRIN results (Output of the `grin.stats()` function).
+#' @param gene Gene symbol of interest.
+#' @param transTrack Logical; if `FALSE`, the transcript track will be excluded (useful for plots of large genomic regions such as entire chromosome arms or bands).
+#' @param lsn.clrs Optional named vector of lesion colors. If not provided, default colors from `default.grin.colors()` will be used.
+#' @param chrom Chromosome number. Required when plotting a locus (used with `plot.start` and `plot.end`).
+#' @param plot.start Start coordinate (in base pairs) of the locus of interest.
+#' @param plot.end End coordinate (in base pairs) of the locus of interest.
+#' @param lesion.grp Lesion group to include in locus plots. Only lesions from this group will be shown. Required when `chrom`, `plot.start`, and `plot.end` are specified.
+#' @param spec.lsn.clr Optional color for highlighting the lesion group of interest in locus plots.
+#' @param extend.left Optional numeric value to extend the left side of the transcripts track (for alignment adjustments).
+#' @param extend.right Optional numeric value to extend the right side of the transcripts track (for alignment adjustments).
+#' @param expand Numeric; controls the proportion of upstream and downstream regions included in the plot relative to gene coordinates. Default is `0.0005`. Set to `0` to plot the gene region only.
+#' @param hg38.transcripts Transcripts data from AnnotationHub (hg38, version 110). Required if `transTrack = TRUE`.
+#' @param hg38.cytoband Data frame of hg38 cytogenetic bands (start and end coordinates in base pairs).
 #'
 #' @details
-#' Function return a plot with all lesions that affect either a gene or a region of interest. Top panel of the regional gene plot has the transcripts track with all transcripts annotated to the gene of interest directly retrieved from ensembl database. The middle panel will has all different types of lesions affecting the gene color coded according to the figure legend. Lower panel of the plot has all the GRIN statistics of the gene that include number of subjects affected by each type of lesions, -log10 p, and –log10q values showing if the gene is significantly affected by the corresponding lesion category. If a certain locus is specified, only transcripts track and the lesion panel will be returned (GRIN results panel will not be added to the plot). In case of plots that span large genomic region such as a chromosome band or the whole chromosome and by specifying transTrack=FALSE, transcripts track will not be added to the plot as well.
+#' The function returns a plot that displays lesions affecting either a gene or a user-defined genomic region. When plotting a gene:
+#' - The top panel shows all transcripts of certain gene or group of genes in a small region retrieved from Ensembl if transTrack=TRUE (default).
+#' - The middle panel visualizes lesions affecting the gene or locus, color-coded by type.
+#' - The bottom panel presents GRIN statistics, including the number of affected subjects, -log10(p), and -log10(q) values in case of gene plots.
+#'
+#' When plotting a genomic locus (via `chrom`, `plot.start`, `plot.end`):
+#' - Only the transcripts track (if `transTrack = TRUE`) and lesion panel are shown.
+#' - GRIN statistics are omitted.
+#'
+#' For large regions like cytobands or entire chromosomes, set `transTrack = FALSE` to avoid overcrowding from long transcript tracks.
 #'
 #' @return
-#' Function will return either a gene plot with the transcripts track, lesions panel and GRIN statistic for the gene of interest, a plot with all lesions and transcripts aligned to a certain locus of interest if chrom, plot.start and plot.end were specified or a plot with all lesions affecting a region of interest without the transcripts track.
+#' A multi-panel plot showing:
+#' - Lesions and transcripts for a gene (with GRIN statistics), or
+#' - Lesions and optional transcripts for a genomic locus, or
+#' - Lesions alone for large genomic regions if transcripts and GRIN panels are excluded.
 #'
 #' @export
 #'
 #' @importFrom graphics rect legend text segments
-#' @importFrom gridGraphics grid.echo
 #' @importFrom grid grid.grab editGrob grid.draw popViewport grid.newpage pushViewport viewport gpar grid.rect
-#' @importFrom Gviz plotTracks IdeogramTrack GenomeAxisTrack GeneRegionTrack
-#' @importFrom ensembldb getGeneRegionTrackForGviz
-#' @importFrom EnsDb.Hsapiens.v75 EnsDb.Hsapiens.v75
-#' @importFrom GenomeInfoDb seqlevelsStyle
 #'
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [grin.stats()]
+#' @seealso \code{\link{grin.stats}}
 #'
 #' @examples
 #' \donttest{
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
-#' data(hg19_cytoband)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #' data(hg38_cytoband)
 #'
 #' # run GRIN analysis using grin.stats function
-#' grin.results=grin.stats(lesion.data,
-#'                         hg19.gene.annotation,
-#'                         hg19.chrom.size)
-#'
-#' # Plots showing different types of lesions affecting a gene of interest with a transcripts
-#' # track that show all the gene transcripts retrieved from Ensembl (hg19 genome assembly):
-#' WT1.gene.plot=lsn.transcripts.plot(grin.results, genome="hg19", gene="WT1",
-#'                                     hg19.cytoband=hg19_cytoband)
-#'
-#' # Plots showing different types of lesions affecting a region of interest with a transcripts
-#' # track added to the plot:
-#' locus.plot=lsn.transcripts.plot(grin.results, genome="hg19", hg19.cytoband=hg19_cytoband,
-#'                                 chrom=9, plot.start=21800000, plot.end=22200000,
-#'                                 lesion.grp = "loss", spec.lsn.clr = "blue")
+#' grin.results=grin.stats(lesion_data,
+#'                         hg38_gene_annotation,
+#'                         hg38_chrom_size)
 #'
 #' # Plots Showing Different Types of Lesions Affecting a region of Interest without plotting the
 #' # transcripts track (this will allow plotting a larger locus of the chromosome such as a
 #' # chromosome band (should specify transTrack = FALSE):
-#' noTranscripts=lsn.transcripts.plot(grin.results, genome="hg19", transTrack = FALSE,
-#'                                    hg19.cytoband=hg19_cytoband, chrom=9, plot.start=19900000,
-#'                                    plot.end=25600000, lesion.grp = "loss", spec.lsn.clr = "blue")
+#' cdkn2a.locus=lsn.transcripts.plot(grin.results, transTrack = FALSE,
+#'                                    hg38.cytoband=hg38_cytoband, chrom=9,
+#'                                    plot.start=19900000, plot.end=25600000,
+#'                                     lesion.grp = "loss", spec.lsn.clr = "blue")
 #'
 #'  # Plots Showing Different Types of Lesions Affecting the whole chromosome:
-#'  chrom.plot=lsn.transcripts.plot(grin.results, genome="hg19", transTrack = FALSE,
-#'                                  hg19.cytoband=hg19_cytoband, chrom=9, plot.start=1,
-#'                                   plot.end=141000000)
-#'
-#' # for GRCh38 (hg38) genome assembly, users should first call the AnnotationHub() web resource then
-#' # specify ah[["AH113665"]] to retrieve the human hg38 gene transcripts. This formal class
-#' # EnsDb object should be called afterwards in the 'hg38.transcripts' argument to return gene and
-#' # regional plots.
+#'  chrom.plot=lsn.transcripts.plot(grin.results, transTrack = FALSE,
+#'                                  hg38.cytoband=hg38_cytoband, chrom=9,
+#'                                  plot.start=1, plot.end=141000000)
 #' }
 
 lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the grin.stats function)
-                              genome,            # genome assembly (hg19 or hg38)
                               gene=NULL,         # gene name (should be only specified in the regional gene plots)
                               transTrack=TRUE,   # if specified as 'FALSE', transcripts track will not be added to the plot
                               lsn.clrs=NULL,     # Specified colors per lesion types (gene plots when gene name is specified). If not specified, colors will be automatically assigned using default.grin.colors function
@@ -100,14 +94,26 @@ lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the g
                               extend.right=NULL, # specified number will be used to manually align the right side of the gene transcripts track directly retrieved from ensembl database with the gene lesions track
                               expand=0.0005,     # Controls ratio of the gene locus (start and end position) to the whole plot with default value = 0.0005 (setting expand=0 will only plot the gene locus from the start to the end position without any of the upstream or downstream regions of the gene)
                               hg38.transcripts=NULL, # transcripts data retrieved from annotation hub for hg38 version 110 (should be only specified if genome="hg38")
-                              hg19.cytoband=NULL,    # hg19 chromosome bands start and end data retrieved from UCSC genome browser (should be only specified if genome="hg19")
                               hg38.cytoband=NULL)    # hg38 chromosome bands start and end data retrieved from UCSC genome browser (should be only specified if genome="hg38")
 
 {
-  # regional gene plot (gene name should be specified)
+  # Check for required Bioconductor packages
+  required_pkgs <- c("Gviz", "gridGraphics", "GenomeInfoDb", "ensembldb")
+  missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+
+  if (length(missing_pkgs) > 0) {
+    stop(
+      sprintf(
+        "The following Bioconductor package(s) are required but not installed: %s.\nPlease install them using:\nBiocManager::install(c(%s))",
+        paste(missing_pkgs, collapse = ", "),
+        paste(sprintf('"%s"', missing_pkgs), collapse = ", ")
+      )
+    )
+  }
+
   if (transTrack==TRUE) {
 
-    if (is.character(gene))
+    if (!is.null(gene)) # regional gene plot (gene name should be specified)
     {
       # Find the requested gene
       gene.data=grin.res[["gene.data"]]
@@ -315,67 +321,36 @@ lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the g
       lesion.plt <- grid::grid.grab()
       lesion.plt <- grid::editGrob(lesion.plt, gp=grid::gpar(fontsize=12))
 
-      ## add the track of gene transcripts directly retrived from ensembl database based on the genome assembly
-      if (genome=="hg19")
-      {
-        edb <- EnsDb.Hsapiens.v75::EnsDb.Hsapiens.v75      # same version of hg19 genome assembly used to retrieve annotation data in the get.ensembl.annotation function to make sure that coordinates will be consistent between gene annotation and the transcripts track files
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, filter = ~ genename == gene)
+      trans.hg38=hg38.transcripts
+      edb <- trans.hg38    # same version of hg38 genome assembly used to retrieve annotation data in the get.ensembl.annotation function to make sure that coordinates will be consistent between gene annotation and the transcripts track files
+      GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
+      txs <- ensembldb::getGeneRegionTrackForGviz(edb, filter = ~ genename == gene)
 
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg19_cytoband=hg19.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg19", chromosome = gene.chr, bands = hg19_cytoband)
-        ## - Genome axis
-        gaxis_track <- Gviz::GenomeAxisTrack()
-        ## - Transcripts
-        gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
-                                            name = "Transcripts", geneSymbol = TRUE, size = 0.5)
+      ## Define the individual tracks:
+      ## - Ideogram
+      hg38_cytoband=hg38.cytoband
+      ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = gene.chr, bands = hg38_cytoband)
+      ## - Genome axis
+      gaxis_track <- Gviz::GenomeAxisTrack()
+      ## - Transcripts
+      gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
+                                          name = "Transcripts", geneSymbol = TRUE, size = 0.5)
 
-        grid::grid.newpage()
+      grid::grid.newpage()
 
-        # specify plotting regions for gene lesions and transcript tracks
-        grid::pushViewport(grid::viewport(height=0.78, width=1.2, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
+      # specify plotting regions for gene lesions and transcript tracks
+      grid::pushViewport(grid::viewport(height=0.78, width=1.2, y=0, just="bottom"))
+      grid::grid.draw(lesion.plt)
+      grid::popViewport(1)
 
-        grid::pushViewport(grid::viewport(height=0.33, width=0.915, y=1, just="top"))
-        Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE, sizes = c(1,2,6))
-        grid::popViewport(1)
+      grid::pushViewport(grid::viewport(height=0.33, width=0.915, y=1, just="top"))
+      Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE, sizes = c(1,2,6))
+      grid::popViewport(1)
 
+    } else {
+      if (is.null(chrom) || is.null(plot.start) || is.null(plot.end)) {
+        stop("Either 'gene' or ('chrom', 'plot.start', 'plot.end') must be provided.")
       }
-
-      if (genome=="hg38")
-      {
-        trans.hg38=hg38.transcripts
-        edb <- trans.hg38    # same version of hg38 genome assembly used to retrieve annotation data in the get.ensembl.annotation function to make sure that coordinates will be consistent between gene annotation and the transcripts track files
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, filter = ~ genename == gene)
-
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg38_cytoband=hg38.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = gene.chr, bands = hg38_cytoband)
-        ## - Genome axis
-        gaxis_track <- Gviz::GenomeAxisTrack()
-        ## - Transcripts
-        gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
-                                            name = "Transcripts", geneSymbol = TRUE, size = 0.5)
-
-        grid::grid.newpage()
-
-        # specify plotting regions for gene lesions and transcript tracks
-        grid::pushViewport(grid::viewport(height=0.78, width=1.2, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
-
-        grid::pushViewport(grid::viewport(height=0.33, width=0.915, y=1, just="top"))
-        Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE, sizes = c(1,2,6))
-        grid::popViewport(1)
-
-      }
-    }
-    else {
 
       # if we want to specify a locus of interest instead of a gene
       locus.chr=chrom
@@ -480,72 +455,38 @@ lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the g
       lesion.plt <- grid::grid.grab()
       lesion.plt <- grid::editGrob(lesion.plt, gp=grid::gpar(fontsize=12))
 
-      ## add the transcripts track for all genes on the specified region  based on the genome assembly
-      if (genome=="hg19")
-      {
-        edb <- EnsDb.Hsapiens.v75::EnsDb.Hsapiens.v75
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
+      trans.hg38=hg38.transcripts
+      edb <- trans.hg38
+      GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
+      txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
+                                                  end=plot.end)
 
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg19_cytoband=hg19.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg19", chromosome = locus.chr, bands = hg19_cytoband)
-        ## - Genome axis
-        gaxis_track <- Gviz::GenomeAxisTrack()
-        ## - Transcripts
-        gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
-                                            name = "Transcripts", geneSymbol = TRUE, size = 0.5)
+      ## Define the individual tracks:
+      ## - Ideogram
+      hg38_cytoband=hg38.cytoband
+      ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr, bands = hg38_cytoband)
+      ## - Genome axis
+      gaxis_track <- Gviz::GenomeAxisTrack()
+      ## - Transcripts
+      gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
+                                          name = "Transcripts", geneSymbol = TRUE, size = 0.5)
 
-        grid::grid.newpage()
+      grid::grid.newpage()
 
-        # specify plotting regions for the locus lesions and transcript tracks
-        grid::pushViewport(grid::viewport(height=0.45, width=1.2, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
+      grid::pushViewport(grid::viewport(height=0.45, width=1.2, y=0, just="bottom"))
+      grid::grid.draw(lesion.plt)
+      grid::popViewport(1)
 
-        grid::pushViewport(grid::viewport(height=0.6, width=0.915, y=1, just="top"))
-        Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE)
-        grid::popViewport(1)
+      grid::pushViewport(grid::viewport(height=0.6, width=0.915, y=1, just="top"))
+      Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE)
+      grid::popViewport(1)
 
-      }
-
-      if (genome=="hg38")
-      {
-        trans.hg38=hg38.transcripts
-        edb <- trans.hg38
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
-
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg38_cytoband=hg38.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr, bands = hg38_cytoband)
-        ## - Genome axis
-        gaxis_track <- Gviz::GenomeAxisTrack()
-        ## - Transcripts
-        gene_track <- Gviz::GeneRegionTrack(txs, showId = TRUE, just.group = "right",
-                                            name = "Transcripts", geneSymbol = TRUE, size = 0.5)
-
-        grid::grid.newpage()
-
-        grid::pushViewport(grid::viewport(height=0.45, width=1.2, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
-
-        grid::pushViewport(grid::viewport(height=0.6, width=0.915, y=1, just="top"))
-        Gviz::plotTracks(list(ideo_track, gaxis_track, gene_track), add=TRUE)
-        grid::popViewport(1)
-      }
     }
 
   }
-
-  else
+  else    # if the transcript track will not be added to the plot in case of large segments of chromosome, chromosome band or the whole chromosome, user can either plot lesions that belong to a certain lesion category or lesions from all different lesion types
   {
-    if (is.character(lesion.grp)) {
+      if (!is.null(lesion.grp)) {
       # To specify a locus of interest for the plotting purpose
       locus.chr=chrom
       locus.start=plot.start
@@ -649,61 +590,29 @@ lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the g
       lesion.plt <- grid::grid.grab()
       lesion.plt <- grid::editGrob(lesion.plt, gp=grid::gpar(fontsize=12))
 
-      ## add the transcripts track for all genes on the specified region  based on the genome assembly
-      if (genome=="hg19")
-      {
-        edb <- EnsDb.Hsapiens.v75::EnsDb.Hsapiens.v75
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
+      ## Define the individual tracks:
+      ## - Ideogram
+      hg38_cytoband=hg38.cytoband
+      ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr,
+                                        bands = hg38_cytoband, from=plot.start, to=plot.end)
 
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg19_cytoband=hg19.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg19", chromosome = locus.chr,
-                                          bands = hg19_cytoband, from=plot.start, to=plot.end)
+      grid::grid.newpage()
 
-        grid::grid.newpage()
+      grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
+      grid::grid.draw(lesion.plt)
+      grid::popViewport(1)
 
-        # specify plotting regions for the locus lesions and transcript tracks
-        grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
+      grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
+      Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
+                       showBandId = TRUE, cex.bands = 0.4)
+      grid::popViewport(1)
 
-        grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
-        Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
-                         showBandId = TRUE, cex.bands = 0.4)
-        grid::popViewport(1)
 
-      }
-
-      if (genome=="hg38")
-      {
-        trans.hg38=hg38.transcripts
-        edb <- trans.hg38
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
-
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg38_cytoband=hg38.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr,
-                                          bands = hg38_cytoband, from=plot.start, to=plot.end)
-
-        grid::grid.newpage()
-
-        grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
-
-        grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
-        Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
-                         showBandId = TRUE, cex.bands = 0.4)
-        grid::popViewport(1)
-      }
     }
-    else if (is.null(lesion.grp)) {
+    else {
+      if (is.null(chrom) || is.null(plot.start) || is.null(plot.end)) {
+        stop("'chrom', 'plot.start', and 'plot.end' must be provided for the plotting region.")
+      }
       # To specify a locus of interest for the plotting purpose
       locus.chr=chrom
       locus.start=plot.start
@@ -813,59 +722,23 @@ lsn.transcripts.plot=function(grin.res,          # GRIN results (output of the g
       lesion.plt <- grid::grid.grab()
       lesion.plt <- grid::editGrob(lesion.plt, gp=grid::gpar(fontsize=12))
 
-      ## add the transcripts track for all genes on the specified region  based on the genome assembly
-      if (genome=="hg19")
-      {
-        edb <- EnsDb.Hsapiens.v75::EnsDb.Hsapiens.v75
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
+      ## Define the individual tracks:
+      ## - Ideogram
+      hg38_cytoband=hg38.cytoband
+      ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr,
+                                        bands = hg38_cytoband, from=plot.start, to=plot.end)
 
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg19_cytoband=hg19.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg19", chromosome = locus.chr,
-                                          bands = hg19_cytoband, from=plot.start, to=plot.end)
+      grid::grid.newpage()
 
-        grid::grid.newpage()
+      grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
+      grid::grid.draw(lesion.plt)
+      grid::popViewport(1)
 
-        # specify plotting regions for the locus lesions and transcript tracks
-        grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
+      grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
+      Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
+                       showBandId = TRUE, cex.bands = 0.4)
+      grid::popViewport(1)
 
-        grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
-        Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
-                         showBandId = TRUE, cex.bands = 0.4)
-        grid::popViewport(1)
-
-      }
-
-      if (genome=="hg38")
-      {
-        trans.hg38=hg38.transcripts
-        edb <- trans.hg38
-        GenomeInfoDb::seqlevelsStyle(edb) <- "UCSC"
-        txs <- ensembldb::getGeneRegionTrackForGviz(edb, chromosome=locus.chr, start=plot.start,
-                                                    end=plot.end)
-
-        ## Define the individual tracks:
-        ## - Ideogram
-        hg38_cytoband=hg38.cytoband
-        ideo_track <- Gviz::IdeogramTrack(genome = "hg38", chromosome = locus.chr,
-                                          bands = hg38_cytoband, from=plot.start, to=plot.end)
-
-        grid::grid.newpage()
-
-        grid::pushViewport(grid::viewport(height=1, width=1.25, y=0, just="bottom"))
-        grid::grid.draw(lesion.plt)
-        grid::popViewport(1)
-
-        grid::pushViewport(grid::viewport(height=0.15, width=0.88, y=1, just="top"))
-        Gviz::plotTracks(ideo_track, from = plot.start, to = plot.end, add=TRUE, showId = FALSE,
-                         showBandId = TRUE, cex.bands = 0.4)
-        grid::popViewport(1)
-      }
     }
   }
 }

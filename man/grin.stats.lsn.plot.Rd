@@ -7,46 +7,50 @@
 grin.stats.lsn.plot(grin.res, feature = NULL, lsn.clrs = NULL, expand = 5e-04)
 }
 \arguments{
-\item{grin.res}{GRIN results for genes or regulatory features (output of the grin.stats function)}
+\item{grin.res}{GRIN results for genes or regulatory elements, as returned by the \code{\link{grin.stats}} function.}
 
-\item{feature}{Feature ensembl ID from Ensembl regulatory build or FANTOM5 project. An ensembl ID of a gene can be provided as well.}
+\item{feature}{Ensembl ID of a feature of interest. This can be either a gene (e.g., Ensembl gene ID) or a regulatory region from Ensembl Regulatory Build or FANTOM5 project.}
 
-\item{lsn.clrs}{Assigned colors per lesion types. If not specified, colors will be automatically assigned using default.grin.colors function.}
+\item{lsn.clrs}{Named vector of colors for each lesion type. If not provided, colors are automatically assigned using \code{\link{default.grin.colors}}.}
 
-\item{expand}{Controls ratio of the feature locus (start and end position) to the whole plot with default value = 0.0005 (setting expand=0 will only plot the locus from the start to the end position without any of the upstream or downstream regions of the feature).}
+\item{expand}{Numeric value that controls the proportion of the flanking region (upstream/downstream) around the gene to be included. Default is \code{0.0005}. Set to \code{0} to restrict the plot strictly to the locus boundaries.}
 }
 \value{
-Function return a plot with all types of lesions that spans either a gene or regulatory feature of interest in addition to the locus GRIN statistics without adding the transcripts panel.
+A two-panel plot showing lesion distribution and GRIN statistics for a given gene or regulatory feature, without a transcript annotation panel.
 }
 \description{
-Function return a plot with all types of lesions that spans either a gene or regulatory feature of interest with GRIN statistics added.
+Generates a plot showing all lesion types that span a specified gene or regulatory feature with GRIN stats added.
 }
 \details{
-Function return a plot with all lesions that affect either a gene regulatory feature of interest. Top panel of the plot will has all different types of lesions affecting the loci color coded according to the figure legend. Lower panel of the plot has all the GRIN statistics of the feature that include number of subjects affected by each type of lesions, -log10 p, and –log10q values showing if the feature is significantly affected by the corresponding lesion category. This plot has no panel for transcripts table as regulatory features typically do not have this kind of information.
+The plot consists of two panels:
+\itemize{
+\item \strong{Top panel}: Displays all lesion types overlapping the selected gene or regulatory feature. Lesions are color-coded by type, as indicated in the legend.
+\item \strong{Bottom panel}: Summarizes GRIN statistics for the feature, including the number of subjects affected per lesion type, and the corresponding \eqn{-\log_{10}(p)} and \eqn{-\log_{10}(q)} values for significance.
+}
+
+This plot is particularly useful for regulatory features, which typically lack transcript structure. Therefore, no transcript or exon structure is shown.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
-data(hg19.chrom.size)
+data(lesion_data)
+data(hg38_gene_annotation)
+data(hg38_chrom_size)
 
-# run GRIN analysis
-grin.results=grin.stats(lesion.data,
-                        hg19.gene.annotation,
-                        hg19.chrom.size)
+# Run GRIN analysis
+grin.results <- grin.stats(lesion_data,
+                           hg38_gene_annotation,
+                           hg38_chrom_size)
 
-# Plots showing different types of lesions and GRIN stats for a gene of interest (WT1):
-grin.stats.lsn.plot(grin.results,
-                     feature="ENSG00000184937")
+# Plot lesion and GRIN stats for a gene of interest (e.g., WT1)
+grin.stats.lsn.plot(grin.results, feature = "ENSG00000184937")
 
-# same function can be used to plot lesion data and GRIN statistics of regulatory features
-# that typically do not have transcripts track to add to the plot.
+# Can also be also used for regulatory features without transcript panels
 }
 \references{
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=grin.stats]{grin.stats()}}
+\code{\link{grin.stats}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

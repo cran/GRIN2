@@ -7,39 +7,48 @@
 find.gene.lsn.overlaps(gl.data)
 }
 \arguments{
-\item{gl.data}{a list of five data.frames that represent the output results of the prep.gene.lsn.data function.}
+\item{gl.data}{A list of five \code{data.frame} objects returned by the \code{prep.gene.lsn.data()} function.
+These include processed and indexed gene and lesion data ready for overlap analysis.}
 }
 \value{
-A list with the following components:
-\item{lsn.data}{Input lesion data}
-\item{gene.data}{Input gene annotation data}
-\item{gene.lsn.data}{data.frame ordered by gene and lesions start position. Gene start position is coded as 1 in the cty column and gene end position is coded as 4. Lesion start position is coded as 2 in the cty column and lesion end position is coded as 3.}
-\item{gene.lsn.hits}{data.frame on which each row represent a gene overlapped by a certain lesion. The data.frame has 11 columns that include "gene" with ensembl ID of the overlapped gene, "gene.chrom", "gene.loc.start" and "gene.loc.end" with data for the chromosome on which the gene is located, start and end positions of the gene. In addition, column "ID" has the ID of the patient with a lesion that overlapped this gene, "lsn.chrom", "lsn.loc.start", "lsn.loc.end" and "lsn.type" have data for the chromosome, lesion start, lesion end positions and the lesion type respectively.}
-\item{gene.index}{data.frame that shows row start and row end for each chromosome in the gene.lsn.data table}
-\item{lsn.index}{data.frame that shows row start and row end for each lesion in the gene.lsn.data table}
+A list containing the following components:
+\item{lsn.data}{Original input lesion data.}
+\item{gene.data}{Original input gene annotation data.}
+\item{gene.lsn.data}{A \code{data.frame} ordered by chromosome and start position, containing both gene and lesion entries.
+Each row includes a \code{cty} code indicating the type and boundary of the interval:
+1 = gene start, 2 = lesion start, 3 = lesion end, 4 = gene end.}
+\item{gene.lsn.hits}{A \code{data.frame} where each row corresponds to a gene overlapped by a lesion.
+Includes 11 columns:
+\code{"gene"} (Ensembl gene ID),
+\code{"gene.chrom"}, \code{"gene.loc.start"}, \code{"gene.loc.end"} (chromosome and coordinates of the gene),
+\code{"ID"} (patient/sample ID),
+\code{"lsn.chrom"}, \code{"lsn.loc.start"}, \code{"lsn.loc.end"} (chromosome and coordinates of the lesion),
+and \code{"lsn.type"} (type of lesion).}
+\item{gene.index}{A \code{data.frame} indexing the rows in \code{gene.lsn.data} that correspond to each chromosome's genes (row start and row end per chromosome).}
+\item{lsn.index}{A \code{data.frame} indexing the rows in \code{gene.lsn.data} that correspond to each lesion (row start and row end per lesion).}
 }
 \description{
-The function use the output of the prep.gene.lsn.data function to find lesion-gene overlaps.
+Identifies overlaps between genes and genomic lesions using the output from the \code{prep.gene.lsn.data()} function.
+This function detects all instances where a lesion spans or intersects the genomic coordinates of a gene.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
+data(lesion_data)
+data(hg38_gene_annotation)
 
-# prepare gene and lesion data for later computations:
-prep.gene.lsn=prep.gene.lsn.data(lesion.data,
-                                 hg19.gene.annotation)
+# Prepare gene and lesion data for GRIN-based computations:
+prep.gene.lsn <- prep.gene.lsn.data(lesion_data, hg38_gene_annotation)
 
-# determine lesions that overlap each gene (locus):
-gene.lsn.overlap=find.gene.lsn.overlaps(prep.gene.lsn)
+# Identify genes that are overlapped by lesions:
+gene.lsn.overlap <- find.gene.lsn.overlaps(prep.gene.lsn)
 }
 \references{
-Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+Pounds, S. et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=prep.gene.lsn.data]{prep.gene.lsn.data()}}
+\code{\link{prep.gene.lsn.data}}
 }
 \author{
-{Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

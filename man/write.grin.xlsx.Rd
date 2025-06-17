@@ -2,49 +2,53 @@
 % Please edit documentation in R/write.grin.xlsx.R
 \name{write.grin.xlsx}
 \alias{write.grin.xlsx}
-\title{Write GRIN Results}
+\title{Write GRIN Results to Excel File}
 \usage{
 write.grin.xlsx(grin.result, output.file)
 }
 \arguments{
-\item{grin.result}{output results of the grin.stats function.}
+\item{grin.result}{A list returned by the \code{\link{grin.stats}} function, containing GRIN analysis output.}
 
-\item{output.file}{output file name ".xlsx".}
+\item{output.file}{A character string specifying the name of the output Excel file. Must end with \code{".xlsx"}.}
 }
 \value{
-This function return an excel file with seven sheets that include:
-\item{gene.hits}{data table of GRIN results that include gene annotation, number of subjects affected by each lesion type for example gain, loss, mutation, etc.., and number of hits affecting each locus. The GRIN results table will also include P and FDR adjusted q-values showing the probability of each locus of being affected by one or a constellation of multiple types of lesions.}
-\item{gene.lsn.data}{each row represent a gene overlapped by a certain lesion. Column "gene" shows the overlapped gene ensembl ID and "ID"" column has the patient ID.}
-\item{lsn.data}{input lesion data}
-\item{gene.data}{input gene annotation data}
-\item{chr.size}{data table showing the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs.}
-\item{interpretation}{provides some details about  the content of each sheet in the output excel file and interpretation of each column in the "gene.hits" GRIN results table.}
-\item{method.paragraph}{include a paragraph that explains the GRIN model and cite some references.}
+The function creates a multi-sheet Excel file at the specified location. The file contains the following sheets:
+\itemize{
+\item \code{gene.hits}: The GRIN results table. Includes gene annotation, number of subjects affected by each lesion type (e.g., gain, loss, mutation), total lesion hits per gene, and associated p-values and FDR-adjusted q-values for the probability of lesion enrichment.
+\item \code{gene.lsn.data}: A table where each row corresponds to a lesion overlapping a specific gene. Columns include \code{"gene"} (Ensembl gene ID) and \code{"ID"} (patient identifier).
+\item \code{lsn.data}: The input lesion dataset used in the GRIN analysis.
+\item \code{gene.data}: The input gene annotation dataset, typically retrieved from Ensembl.
+\item \code{chr.size}: A table listing the size (in base pairs) of chromosomes 1:22, X, and Y.
+\item \code{interpretation}: A guide to understanding the structure and content of each sheet, with detailed descriptions of columns in the \code{gene.hits} results table.
+\item \code{method.paragraph}: A summary of the GRIN methodology, including relevant references for citation.
+}
 }
 \description{
-The function Write GRIN results to an excel file with multiple sheets that include GRIN results, lesion data, gene annotation data, chromosome size, gene-lesion overlap and methods paragraph.
+Writes GRIN results to an Excel file containing multiple sheets. The output includes the GRIN summary statistics, input data (lesion and gene annotation), chromosome sizes, gene-lesion overlaps, and explanatory metadata to help with the results interpretation.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
-data(hg19.chrom.size)
+data(lesion_data)
+data(hg38_gene_annotation)
+data(hg38_chrom_size)
 
-# to directly retreive gene annotation and chromosome size files from Ensembl BioMart database,
-# UCSC genome browsers and run the GRIN analysis:
-grin.results=grin.stats(lesion.data,
-                         hg19.gene.annotation,
-                         hg19.chrom.size)
+# Run GRIN analysis using lesion, gene, and chromosome size data:
+grin.results <- grin.stats(lesion_data,
+                           hg38_gene_annotation,
+                           hg38_chrom_size)
 
-# Write GRIN results in to an excel sheet ".xlsx" using write.grin.xlsx function.
+# Write results to an Excel file:
+tmp_file <- file.path(tempdir(), "GRIN_Results.xlsx")
+write.grin.xlsx(grin.results, output.file = tmp_file)
+if (file.exists(tmp_file)) file.remove(tmp_file)
 }
 \references{
-Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=grin.stats]{grin.stats()}}
+\code{\link{grin.stats}}
 }
 \author{
-{Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

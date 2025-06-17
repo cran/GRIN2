@@ -9,21 +9,22 @@
 
 A data frame with 1,549 rows and 5 columns:
 \describe{
-\item{chrom}{The chromosome number.}
-\item{chromStart}{The cytoband start position on the chromosome in base pairs.}
-\item{chromEnd}{The cytoband end position on the chromosome in base pairs.}
-\item{name}{The cytoband name.}
-\item{gieStain}{The coloring scheme of the cytobands.}
+\item{chrom}{Chromosome name (1:22, X, Y).}
+\item{chromStart}{Start position of the cytoband in base pairs.}
+\item{chromEnd}{End position of the cytoband in base pairs.}
+\item{name}{Name of the cytoband (e.g., p11.1, q22.3).}
+\item{gieStain}{Staining pattern (e.g., gpos, gneg, acen) used for cytogenetic visualization.}
 }
 }
 }
 \source{
-The Chromosome cytobands data file was downloaded from the UCSC genome browser for GRCh38 genome assembly \url{https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/}.
+Retrieved from the UCSC Genome Browser (GRCh38 assembly):
+\url{https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/}
 }
 \usage{
 hg38_cytoband
 }
 \description{
-The dataset has the start and end positions in base pairs of all 22 autosomes in addition to X and Y chromosome cytobands for Human-GRCh38 (hg38) genome assembly.
+This dataset contains the start and end positions (in base pairs) of cytogenetic bands (cytobands) for all 22 autosomes, as well as the X and Y chromosomes, based on the Human GRCh38 (hg38) genome assembly.
 }
 \keyword{datasets}

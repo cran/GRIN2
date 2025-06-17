@@ -1,48 +1,53 @@
 
-#' GRIN Bar Plot
+#' GRIN Lesion Stacked Bar Plot
 #'
 #' @description
-#' Function return a stacked bar plot with number of patients affected by all different types of lesions in a pre-specified list of genes of interest.
+#' Generates a stacked bar plot showing the number of patients affected by different types of genomic lesions in a user-specified list of genes of interest, based on GRIN analysis results.
 #'
-#' @param grin.res GRIN results (output of the grin.stats function).
-#' @param count.genes vector with gene names of a list of genes to be added to the bar plot.
-#' @param lsn.colors Lesion colors (If not provided by the user, colors will be automatically assigned using default.grin.colors function).
+#' @param grin.res A data frame of GRIN results, typically the output from the \code{\link{grin.stats}} function.
+#' @param count.genes A character vector of gene names to include in the bar plot. Only genes present in the GRIN results table will be used.
+#' @param lsn.colors (Optional) A named vector specifying colors for each lesion type. If not provided, default lesion colors will be automatically assigned using the \code{\link{default.grin.colors}} function.
 #'
 #' @details
-#' Function will use the input list of gene names and extract the number of patients affected by all different types of lesions in those genes from the GRIN results table (output of the grin.stats function).
+#' The function subsets the GRIN results to the genes specified in \code{count.genes}, extracts the number of patients affected by each lesion type for each gene, and visualizes the data as a horizontal stacked bar plot. Each bar represents a gene and is segmented by lesion type (e.g., gain, loss, mutation), with segment size proportional to the number of affected patients.
+#'
+#' This visualization is useful for highlighting the burden and distribution of different lesion types across key driver genes or other genes of interest.
 #'
 #' @return
-#' Function return a stacked bar plot with number of patients affected by all different types of lesions in the pre-specified list of genes of interest.
+#' A ggplot2-based stacked bar plot showing lesion type distribution across the selected genes.
 #'
 #' @export
 #'
 #' @importFrom dplyr select group_by summarize arrange mutate
-#' @importFrom ggplot2 geom_bar position_stack scale_fill_manual geom_text labs coord_flip theme_classic element_text theme ggplot
+#' @importFrom ggplot2 ggplot geom_bar geom_text scale_fill_manual position_stack labs coord_flip theme_classic theme element_text
 #' @importFrom utils stack
 #' @importFrom stats na.omit reorder
 #' @importFrom tidyselect starts_with
 #' @importFrom magrittr %>%
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [grin.stats()]
+#' @seealso \code{\link{grin.stats}}, \code{\link{default.grin.colors}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #'
-#'# run GRIN analysis using grin.stats function
-#' grin.results=grin.stats(lesion.data,
-#'                         hg19.gene.annotation,
-#'                         hg19.chrom.size)
+#' # Run GRIN analysis
+#' grin.results <- grin.stats(lesion_data,
+#'                            hg38_gene_annotation,
+#'                            hg38_chrom_size)
 #'
-#' # specify a list of genes to be included in the bar plot (driver genes)
-#' count.genes=as.vector(c("TAL1", "FBXW7", "PTEN", "IRF8","NRAS",
-#'                         "BCL11B", "MYB", "LEF1","RB1", "MLLT3", "EZH2", "ETV6", "CTCF",
-#'                         "JAK1", "KRAS", "RUNX1", "IKZF1", "KMT2A", "RPL11", "TCF7",
-#'                         "WT1", "JAK2", "JAK3", "FLT3"))
-#' # return the stacked barplot
+#' # Define a list of genes to be included in the bar plot (e.g., candidate driver genes)
+#' count.genes <- c("TAL1", "FBXW7", "PTEN", "IRF8", "NRAS",
+#'                  "BCL11B", "MYB", "LEF1", "RB1", "MLLT3",
+#'                  "EZH2", "ETV6", "CTCF", "JAK1", "KRAS",
+#'                  "RUNX1", "IKZF1", "KMT2A", "RPL11", "TCF7",
+#'                  "WT1", "JAK2", "JAK3", "FLT3")
+#'
+#' # Generate the bar plot
 #' grin.barplt(grin.results, count.genes)
 
 grin.barplt=function(grin.res,        # GRIN results (output of the grin.stats function)

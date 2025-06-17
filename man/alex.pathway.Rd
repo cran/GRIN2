@@ -2,49 +2,61 @@
 % Please edit documentation in R/alex.pathway.R
 \name{alex.pathway}
 \alias{alex.pathway}
-\title{Associate Lesions with Expression Data on the Pathway Level}
+\title{Visualize Lesion and Expression Data by Pathway}
 \usage{
-alex.pathway(alex.data, lsn.data, pathways, selected.pathway)
+alex.pathway(alex.data, lsn.clrs = NULL, lsn.data, pathways, selected.pathway)
 }
 \arguments{
-\item{alex.data}{output of the alex.prep.lsn.expr function. It's a list of three data tables that include "row.mtch", "alex.expr" with expression data, "alex.lsn" with lesion data. Rows of alex.expr, and "alex.lsn" matrices are ordered by gene ensembl IDs and columns are ordered by patient ID.}
+\item{alex.data}{Output of the \code{alex.prep.lsn.expr} function. A list of three data tables: \code{"row.mtch"}, \code{"alex.expr"} (expression matrix), and \code{"alex.lsn"} (lesion matrix). Rows in both matrices are ordered by Ensembl gene IDs; columns represent patient IDs.}
 
-\item{lsn.data}{Lesion data in a GRIN compatible format. data.frame should has five columns that include "ID" with patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion type for example gain, loss, mutation, fusion, etc...}
+\item{lsn.clrs}{Optional. A named vector of colors for lesion types. If not specified, default colors will be assigned using \code{default.grin.colors()}.}
 
-\item{pathways}{data.frame with three columns "gene.name" that has gene symbols, "ensembl.id" with gene ensembl ID and "pathway" that has the pathway name.}
+\item{lsn.data}{A data frame of lesion data in GRIN-compatible format with the following columns:
+\code{"ID"} (patient ID), \code{"chrom"} (chromosome), \code{"loc.start"} (lesion start), \code{"loc.end"} (lesion end), and \code{"lsn.type"} (e.g., gain, loss, mutation, fusion).}
 
-\item{selected.pathway}{The pathway of interest.}
+\item{pathways}{A data frame with three columns: \code{"gene.name"} (gene symbol), \code{"ensembl.id"} (Ensembl gene ID), and \code{"pathway"} (pathway name).}
+
+\item{selected.pathway}{A character string indicating the pathway of interest.}
 }
 \value{
-Function will return two panels figure of lesion and expression data of ordered subjects based on the computed distances of lesions in all genes assigned to the pathway of interest. The function will also return:
-\item{ordered.path.data}{data.frame with lesion and expression data of the pathway genes ordered based on the hiearchial clustering analysis (same order of the subjects in the lesion and expression panels of the figure).}
+A list with the following element:
+\item{ordered.path.data}{A data frame with lesion and expression data for pathway genes, ordered according to hierarchical clustering (matching the order used in the plot).}
+
+A figure with two panels will also be generated showing:
+\enumerate{
+\item Lesion data of pathway genes across subjects
+\item Expression data of the same genes across subjects
+}
+Both panels are ordered by subject similarity based on lesion profiles.
 }
 \description{
-Function compute the distance between subjects in the dataset based on the lesions that affect different genes assigned to the pathway of interest and return two panels of lesion and expression data of ordered subjects based on the computed distances.
+Computes pairwise distances between subjects based on lesion profiles in genes associated with a specified pathway, and returns a figure with two panels: one showing lesion data and another showing expression data, both ordered based on the computed distances (useful for hierarchical clustering). It also returns the corresponding ordered data.
 }
 \details{
-Function compute the distance between subjects in th dataset based on lesions affecting different genes assigned to the pathway of interest and return two panels of lesion and expression data of ordered subjects based on the computed distances. Function also return a data.frame with lesion and expression data of the pathway genes ordered based on the hierarchical clustering analysis (same order of the subjects in the lesion and expression panels of the figure).
+This function identifies all genes associated with the specified pathway, extracts lesion and expression data for those genes, and computes pairwise distances between subjects based on their lesion profiles. It uses hierarchical clustering to order the subjects and visualizes lesion and expression matrices in two aligned panels. It also returns a data frame containing the ordered expression and lesion data for all genes in the pathway.
 }
 \examples{
-data(expr.data)
-data(lesion.data)
-data(hg19.gene.annotation)
+data(expr_data)
+data(lesion_data)
+data(hg38_gene_annotation)
 data(pathways)
 
-# prepare expression, lesion data and return the set of genes with both types of data available
-# ordered by gene IDs in rows and patient IDs in columns:
-alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-                             hg19.gene.annotation, min.expr=5,
-                             min.pts.lsn=5)
+# Prepare matched expression and lesion data
+alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+                                hg38_gene_annotation, min.expr = 5, min.pts.lsn = 5)
 
-# use lesions in all genes assigned to the jak_pathway as an example pathway:
-alex.path=alex.pathway(alex.data, lesion.data, pathways, "Jak_Pathway")
-# extract expression and lesion data (same subjects order in the figure)
-alex.path
+# Visualize pathway-level association using JAK pathway as an example
+alex.path=alex.pathway(alex.data,
+                       lsn.data = lesion_data,
+                       pathways = pathways,
+                       selected.pathway = "Jak_Pathway")
+
+# Access the ordered data matrix used in the plot
+head(alex.path$ordered.path.data)
 }
 \seealso{
-\code{\link[=alex.prep.lsn.expr]{alex.prep.lsn.expr()}}, \code{\link[stats:hclust]{stats::hclust()}}
+\code{\link{alex.prep.lsn.expr}}, \code{\link[stats]{hclust}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

@@ -2,59 +2,69 @@
 % Please edit documentation in R/top.alex.waterfall.plots.R
 \name{top.alex.waterfall.plots}
 \alias{top.alex.waterfall.plots}
-\title{Waterfall Plots for Lesion and Expression Data of Top Significant Genes}
+\title{Generate Waterfall Plots for Top Significant Genes}
 \usage{
 top.alex.waterfall.plots(out.dir, alex.data, alex.kw.results, q, lsn.data)
 }
 \arguments{
-\item{out.dir}{Path to the folder where the waterfall plots of selected genes based on the specified q value of the KW results table will be added.}
+\item{out.dir}{A character string specifying the output directory where the waterfall plots for selected genes will be saved. Directory must exist or be created by the user prior to running the function.}
 
-\item{alex.data}{output of the alex.prep.lsn.expr function. It's a list of three data tables that include "row.mtch", "alex.expr" with expression data, "alex.lsn" with lesion data. Rows of alex.expr, and "alex.lsn" matrices are ordered by gene ensembl IDs and columns are ordered by patient ID.}
+\item{alex.data}{A list of three data tables returned by \code{\link{alex.prep.lsn.expr}}:
+\itemize{
+\item \code{"row.mtch"} matching expression and lesion rows by Ensembl gene ID.
+\item \code{"alex.expr"} matrix of gene expression.
+\item \code{"alex.lsn"} matrix of lesion status.
+}
+All matrices must have rows ordered by Ensembl gene ID and columns ordered by patient ID.}
 
-\item{alex.kw.results}{ALEX Kruskal-Wallis test results (output of the KW.hit.express function).}
+\item{alex.kw.results}{A data table of Kruskal Wallis test results, returned by the \code{\link{KW.hit.express}} function.}
 
-\item{q}{Maximum allowed KW q-value threshold for a gene to be plotted based on the output of the KW.hit.express function.}
+\item{q}{A numeric threshold indicating the maximum allowed KW q-value for a gene to be included in the waterfall plots.}
 
-\item{lsn.data}{Lesion data in a GRIN compatible format.}
+\item{lsn.data}{Lesion data provided in GRIN-compatible format (as used in \code{\link{alex.prep.lsn.expr}}).}
 }
 \value{
-Function will return waterfall plots for top significant genes in the KW results table.
+No object is returned to the R environment. The function creates a set of PDF files (one per gene) in the specified \code{out.dir} directory. Each file contains a labeled waterfall plot illustrating gene expression across different lesion groups.
 }
 \description{
-Function return waterfall plots for top significant genes in the KW results table based on the specified q value.
+Generates waterfall plots for genes with significant associations between lesion status and expression level, based on the Kruskal Wallis (KW) test results. Only genes with q-values below a user-specified threshold will be plotted.
 }
 \details{
-Function will return waterfall plots for top significant genes in the KW results table based on the user specified q-value threshold of the KW test.The plots will be added to the user specified outdir folder.
+For each gene in the \code{alex.kw.results} table with a q-value less than or equal to the user-specified \code{q} threshold, the function generates a waterfall plot displaying the relationship between lesion status and gene expression level. Each plot is saved as a separate PDF file in the \code{out.dir} folder.
+
+Internally, this function relies on helper functions such as \code{\link{alex.waterfall.prep}} and \code{\link{alex.waterfall.plot}} to prepare and render the plots.
 }
 \examples{
-data(expr.data)
-data(lesion.data)
-data(hg19.gene.annotation)
+data(expr_data)
+data(lesion_data)
+data(hg38_gene_annotation)
 
-# prepare expression, lesion data and return the set of genes with both types of data available
-# ordered by gene IDs in rows and patient IDs in columns:
-alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-                             hg19.gene.annotation, min.expr=5,
-                              min.pts.lsn=5)
+# 1) Prepare matched expression and lesion matrices:
+alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+                                hg38_gene_annotation,
+                                min.expr = 5, min.pts.lsn = 5)
+# 2) Run Kruskal Wallis test:
+alex.kw.results <- KW.hit.express(alex.data,
+                                  hg38_gene_annotation,
+                                  min.grp.size = 5)
 
-# run KW test for association between lesion groups and expression level of the same gene:
-alex.kw.results=KW.hit.express(alex.data, hg19.gene.annotation, min.grp.size=5)
-
-# return waterfall plots for a list of top significant genes to a pre-specified folder:
+# 3) Create temporary output folder and generate waterfall plots:
 dir.create(resultsFolder <- file.path(tempdir(), "temp.out"))
+waterfall.plts <- top.alex.waterfall.plots(out.dir = resultsFolder,
+                                           alex.data = alex.data,
+                                           alex.kw.results = alex.kw.results,
+                                           q = 1e-15,
+                                           lsn.data = lesion_data)
 
-waterfall.plts=top.alex.waterfall.plots(out.dir=resultsFolder,
-                                        alex.data, alex.kw.results,
-                                        1e-15, lesion.data)
-
+# Clean up:
 unlink(resultsFolder, recursive = TRUE)
 }
 \references{
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=alex.prep.lsn.expr]{alex.prep.lsn.expr()}}, \code{\link[=KW.hit.express]{KW.hit.express()}}, \code{\link[=alex.waterfall.prep]{alex.waterfall.prep()}}, \code{\link[=alex.waterfall.plot]{alex.waterfall.plot()}}
+\code{\link{alex.prep.lsn.expr}}, \code{\link{KW.hit.express}}, \code{\link{alex.waterfall.prep}}, \code{\link{alex.waterfall.plot}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

@@ -1,0 +1,21 @@
+
+#' Example Gene Annotation Data File
+#'
+#' This dataset contains example annotation data for 417 selected genes (matching the gene set in the example gene expression dataset). The data was retrieved from the Ensembl BioMart database using the `get.ensembl.annotation` function with "Human-GRCh38" as the genome assembly (hg38).
+#'
+#' @format ## `hg38_gene_annotation`
+#' A data frame with 417 rows and 9 columns:
+#' \describe{
+#'   \item{gene}{Ensembl gene ID.}
+#'   \item{chrom}{Chromosome on which the gene is located.}
+#'   \item{loc.start}{Gene start position (in base pairs).}
+#'   \item{loc.end}{Gene end position (in base pairs).}
+#'   \item{description}{Description of the gene.}
+#'   \item{gene.name}{Gene symbol.}
+#'   \item{biotype}{Gene biotype, including categories such as protein-coding, long noncoding RNA (lncRNA), microRNA (miRNA), small nuclear RNA (snRNA), small nucleolar RNA (snoRNA), immunoglobulin (IG), T-cell receptor (TCR), and pseudogene.}
+#'   \item{chrom.strand}{Strand on which the gene is located: forward (1) or reverse (-1).}
+#'   \item{chrom.band}{Chromosomal cytoband where the gene is located.}
+#' }
+#'
+#' @source Retrieved from the Ensembl BioMart database using the `get.ensembl.annotation` function with the "Human-GRCh38" genome assembly (hg38). Then a subset of 417 out of around 62,000 genes was selected for the example dataset.
+"hg38_gene_annotation"

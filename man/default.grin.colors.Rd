@@ -2,34 +2,36 @@
 % Please edit documentation in R/default.grin.colors.R
 \name{default.grin.colors}
 \alias{default.grin.colors}
-\title{Default GRIN Colors}
+\title{Assign Default GRIN Colors}
 \usage{
 default.grin.colors(lsn.types)
 }
 \arguments{
-\item{lsn.types}{Unique lesion types as specified in the lesion data file.}
+\item{lsn.types}{A character vector of unique lesion types, typically derived from the lesion data.}
 }
 \value{
-Function return a vector of colors assigned to each unique lesion type.
+A named character vector of colors corresponding to each lesion type.
 }
 \description{
-Function assigns default colors for each lesion group in the whole set of GRIN plots.
+Assigns a default set of colors to lesion types for use in GRIN plots.
 }
 \details{
-The function specifies 10 colors for different lesion types. If the number of lesion types is more than 10, the user will be asked to specify the colors manually.
+This function provides a predefined palette of up to 10 distinct colors for lesion types used in GRIN visualizations. If more than 10 lesion types are provided, the function will prompt the user to manually define custom colors to ensure visual distinction.
 }
 \examples{
-data(lesion.data)
+data(lesion_data)
 
-lsn.types=unique(lesion.data$lsn.type)
-# assign colors for different lesion categories using default.grin.colors function:
+# Extract unique lesion types
+lsn.types <- unique(lesion_data$lsn.type)
+
+# Assign default colors to lesion types
 default.grin.colors(lsn.types)
 }
 \references{
-Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+Pounds, S. B., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \author{
-{Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

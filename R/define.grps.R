@@ -1,5 +1,5 @@
 
-# define.grps: Function defines the lesion groups to be included in the Kruskal-Wallis test. 
+# define.grps: Function defines the lesion groups to be included in the Kruskal-Wallis test.
 # There should be at least two groups with the minimum number of subjects with lesions as specified in the min.grp.size, otherwise the test will return NA).
 # The function exclude lesion groups that might have a very small number of patients that might exaggerates the KW test results.
 

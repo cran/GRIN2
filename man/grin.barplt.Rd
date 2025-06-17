@@ -2,47 +2,51 @@
 % Please edit documentation in R/grin.barplt.R
 \name{grin.barplt}
 \alias{grin.barplt}
-\title{GRIN Bar Plot}
+\title{GRIN Lesion Stacked Bar Plot}
 \usage{
 grin.barplt(grin.res, count.genes, lsn.colors = NULL)
 }
 \arguments{
-\item{grin.res}{GRIN results (output of the grin.stats function).}
+\item{grin.res}{A data frame of GRIN results, typically the output from the \code{\link{grin.stats}} function.}
 
-\item{count.genes}{vector with gene names of a list of genes to be added to the bar plot.}
+\item{count.genes}{A character vector of gene names to include in the bar plot. Only genes present in the GRIN results table will be used.}
 
-\item{lsn.colors}{Lesion colors (If not provided by the user, colors will be automatically assigned using default.grin.colors function).}
+\item{lsn.colors}{(Optional) A named vector specifying colors for each lesion type. If not provided, default lesion colors will be automatically assigned using the \code{\link{default.grin.colors}} function.}
 }
 \value{
-Function return a stacked bar plot with number of patients affected by all different types of lesions in the pre-specified list of genes of interest.
+A ggplot2-based stacked bar plot showing lesion type distribution across the selected genes.
 }
 \description{
-Function return a stacked bar plot with number of patients affected by all different types of lesions in a pre-specified list of genes of interest.
+Generates a stacked bar plot showing the number of patients affected by different types of genomic lesions in a user-specified list of genes of interest, based on GRIN analysis results.
 }
 \details{
-Function will use the input list of gene names and extract the number of patients affected by all different types of lesions in those genes from the GRIN results table (output of the grin.stats function).
+The function subsets the GRIN results to the genes specified in \code{count.genes}, extracts the number of patients affected by each lesion type for each gene, and visualizes the data as a horizontal stacked bar plot. Each bar represents a gene and is segmented by lesion type (e.g., gain, loss, mutation), with segment size proportional to the number of affected patients.
+
+This visualization is useful for highlighting the burden and distribution of different lesion types across key driver genes or other genes of interest.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
-data(hg19.chrom.size)
+data(lesion_data)
+data(hg38_gene_annotation)
+data(hg38_chrom_size)
 
-# run GRIN analysis using grin.stats function
-grin.results=grin.stats(lesion.data,
-                        hg19.gene.annotation,
-                        hg19.chrom.size)
+# Run GRIN analysis
+grin.results <- grin.stats(lesion_data,
+                           hg38_gene_annotation,
+                           hg38_chrom_size)
 
-# specify a list of genes to be included in the bar plot (driver genes)
-count.genes=as.vector(c("TAL1", "FBXW7", "PTEN", "IRF8","NRAS",
-                        "BCL11B", "MYB", "LEF1","RB1", "MLLT3", "EZH2", "ETV6", "CTCF",
-                        "JAK1", "KRAS", "RUNX1", "IKZF1", "KMT2A", "RPL11", "TCF7",
-                        "WT1", "JAK2", "JAK3", "FLT3"))
-# return the stacked barplot
+# Define a list of genes to be included in the bar plot (e.g., candidate driver genes)
+count.genes <- c("TAL1", "FBXW7", "PTEN", "IRF8", "NRAS",
+                 "BCL11B", "MYB", "LEF1", "RB1", "MLLT3",
+                 "EZH2", "ETV6", "CTCF", "JAK1", "KRAS",
+                 "RUNX1", "IKZF1", "KMT2A", "RPL11", "TCF7",
+                 "WT1", "JAK2", "JAK3", "FLT3")
+
+# Generate the bar plot
 grin.barplt(grin.results, count.genes)
 }
 \seealso{
-\code{\link[=grin.stats]{grin.stats()}}
+\code{\link{grin.stats}}, \code{\link{default.grin.colors}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

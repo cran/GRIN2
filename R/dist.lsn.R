@@ -1,5 +1,5 @@
 
-# compute distance for lesions
+# Computes pairwise distances between subjects based on lesion profiles.
 
 dist.lsn=function(lsn.mtx) # subjects in columns, genes in rows
 {

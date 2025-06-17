@@ -1,6 +1,6 @@
 Package: GRIN2
 Title: Genomic Random Interval (GRIN)
-Version: 1.0
+Version: 2.0.0
 Authors@R: 
     c(person("Abdelrahman", "Elsayed", email = "aelsayed@stjude.org", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-8150-6825")),
@@ -11,11 +11,11 @@ Description: Improved version of 'GRIN' software that streamlines its use in pra
 License: GPL (>= 3)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-Imports: biomaRt, circlize, ComplexHeatmap, data.table, dplyr,
-        EnsDb.Hsapiens.v75, ensembldb, forcats, GenomeInfoDb, ggplot2,
-        graphics, grDevices, grid, gridGraphics, Gviz, magrittr, stats,
-        stringr, survival, tibble, tidyselect, utils, writexl
-Suggests: knitr, rmarkdown
+Imports: circlize, data.table, dplyr, forcats, ggplot2, graphics,
+        grDevices, grid, magrittr, stats, stringr, survival, tibble,
+        tidyselect, utils, writexl
+Suggests: knitr, rmarkdown, biomaRt, gridGraphics, Gviz, ensembldb,
+        GenomeInfoDb, ComplexHeatmap,
 NeedsCompilation: no
 Maintainer: Abdelrahman Elsayed <aelsayed@stjude.org>
 Depends: R (>= 4.2.0)
@@ -23,11 +23,11 @@ LazyData: true
 VignetteBuilder: knitr
 URL: https://github.com/abdel-elsayed87/GRIN2
 BugReports: https://github.com/abdel-elsayed87/GRIN2/issues
-Packaged: 2024-11-18 22:39:09 UTC; aelsa
-Author: Abdelrahman Elsayed [aut, cre, cph]
-    (<https://orcid.org/0000-0002-8150-6825>),
+Packaged: 2025-06-17 03:56:22 UTC; aelsayed
+Author: Abdelrahman Elsayed [aut, cre, cph] (ORCID:
+    <https://orcid.org/0000-0002-8150-6825>),
   Xueyuan Cao [aut],
   Lakshmi Anuhya patibandla [aut],
   Stanley Pounds [aut, cph]
 Repository: CRAN
-Date/Publication: 2024-11-19 12:30:36 UTC
+Date/Publication: 2025-06-17 05:30:02 UTC

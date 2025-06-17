@@ -7,49 +7,48 @@
 alex.waterfall.prep(alex.data, alex.kw.results, gene, lsn.data)
 }
 \arguments{
-\item{alex.data}{output of the alex.prep.lsn.expr function. It's a list of three data tables that include "row.mtch", "alex.expr" with expression data, "alex.lsn" with lesion data. Rows of alex.expr, and "alex.lsn" matrices are ordered by the gene ensembl IDs and columns are ordered by patient IDs.}
+\item{alex.data}{Output from \code{alex.prep.lsn.expr}. A list of three data tables: \code{"row.mtch"} (gene matching info), \code{"alex.expr"} (expression matrix), and \code{"alex.lsn"} (lesion matrix). Rows are ordered by Ensembl gene IDs, and columns are ordered by patient IDs.}
 
-\item{alex.kw.results}{ALEX Kruskal-Wallis test results (output of the KW.hit.express function).}
+\item{alex.kw.results}{Kruskal Wallis test results for gene expression by lesion group, as returned by \code{KW.hit.express}.}
 
-\item{gene}{Gene name or ensembl ID of the gene of interest.}
+\item{gene}{Gene of interest, specified by either its gene symbol or Ensembl ID.}
 
-\item{lsn.data}{Lesion data in a GRIN compatible format. Object should has five columns that include "ID" with patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion category for example gain, loss, mutation, fusion, etc...}
+\item{lsn.data}{Lesion data in GRIN-compatible format. A data frame with five required columns: \code{"ID"} (patient ID), \code{"chrom"} (chromosome), \code{"loc.start"} (lesion start), \code{"loc.end"} (lesion end), and \code{"lsn.type"} (lesion type; e.g., gain, loss, mutation, fusion, etc...).}
 }
 \value{
-A list of four components:
-\item{gene.lsn.exp}{Data table with three columns("ID" with patient ID, "gene.name_lsn" has the type of lesion affecting the patient which can be none, gain, mutation, multiple, etc.. and "gene.name_expr" which has the expression level of the gene of interst in this particular patient.}
-\item{lsns}{Data table with all lesions affecting the gene of interst in a GRIN compatible format extracted from the lesion data file.}
-\item{stats}{One row with the Kruskal-Wallis test result for the gene of interst (output of the KW.hit.express function).}
-\item{gene.ID}{Gene name of the gene of interst.}
+A list with the following components:
+\item{gene.lsn.exp}{A data table with three columns: \code{"ID"} (patient ID), \code{"<gene_name>_lsn"} (lesion status: e.g., none, gain, mutation, multiple), and \code{"<gene_name>_expr"} (expression level of the gene in that patient).}
+\item{lsns}{A data table of all lesions affecting the gene of interest, extracted from the input lesion data (GRIN-compatible format).}
+\item{stats}{A one-row data frame containing the Kruskal Wallis test result for the gene, from \code{KW.hit.express}.}
+\item{gene.ID}{The gene name (symbol or Ensembl ID) provided as input.}
 }
 \description{
-Function prepares lesion and expression data of a selected gene for the alex.waterfall.plot function.
+Prepares matched lesion and expression data for a selected gene to be used with the \code{alex.waterfall.plot} function.
 }
 \details{
-Function prepares lesion and expression data of a selected gene for the alex.waterfall.plot function. It return a data table with patient ID, lesion types that affect each patient if any and expression level of the gene of interest. It also extract the kruskal-wallis test result and all lesions that affect the gene of interest.
+This function extracts and combines lesion and expression data for a specified gene across patients. It returns a data table showing each patient's lesion status and expression level for the gene. It also extracts the corresponding Kruskal Wallis test result and all lesions that affect the gene from the lesion data.
 }
 \examples{
-data(expr.data)
-data(lesion.data)
-data(hg19.gene.annotation)
+data(expr_data)
+data(lesion_data)
+data(hg38_gene_annotation)
 
-# prepare expression, lesion data and return the set of genes with both types of data available
-# ordered by gene IDs in rows and patient IDs in columns:
-alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-                             hg19.gene.annotation, min.expr=1, min.pts.lsn=5)
+# Prepare matched expression and lesion data
+alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+                                hg38_gene_annotation, min.expr = 1, min.pts.lsn = 5)
 
-# run KW test for association between lesion groups and expression level of the same gene:
-alex.kw.results=KW.hit.express(alex.data, hg19.gene.annotation, min.grp.size=5)
+# Run Kruskal Wallis test
+alex.kw.results <- KW.hit.express(alex.data, hg38_gene_annotation, min.grp.size = 5)
 
-# To prepare lesion and expression data for a waterfall plot (WT1 gene):
-WT1.waterfall.prep=alex.waterfall.prep(alex.data, alex.kw.results, "WT1", lesion.data)
+# Prepare lesion and expression data for waterfall plot of WT1
+WT1.waterfall.prep <- alex.waterfall.prep(alex.data, alex.kw.results, "WT1", lesion_data)
 }
 \references{
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=alex.prep.lsn.expr]{alex.prep.lsn.expr()}}, \code{\link[=KW.hit.express]{KW.hit.express()}}
+\code{\link{alex.prep.lsn.expr}}, \code{\link{KW.hit.express}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

@@ -15,3 +15,4 @@ p.order=function(P) # matrix of lesion hit probabilities, rows for genes, column
   }
   return(res)
 }
+

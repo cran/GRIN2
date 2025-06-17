@@ -1,57 +1,63 @@
 
-#' Find Probablity of Locus Hit
+#' Find Probability of Locus Hit
 #'
 #' @description
-#' The function evaluates the probability of a locus to be affected by one or a constellation of multiple types of lesions.
+#' Computes the probability that each genomic locus (e.g., gene or regulatory region) is affected by one or more types of genomic lesions. This function estimates statistical significance for lesion enrichment using a convolution of independent but non-identical Bernoulli distributions.
 #'
-#' @param hit.cnt output results of the count.hits function with number of subjects and number of hits affecting each locus.
-#' @param chr.size data.frame with the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs. The data.frame should has two columns "chrom" with the chromosome number and "size" for the size of the chromosome in base pairs.
+#' @param hit.cnt A list returned by the `count.hits()` function, containing the number of subjects and hits affecting each locus by lesion type.
+#' @param chr.size A `data.frame` containing chromosome sizes for all 22 autosomes and the X and Y chromosomes. It must include two columns: \code{"chrom"} for chromosome number, and \code{"size"} for chromosome lengths in base pairs.
 #'
 #' @details
-#' The function computes p-value for the probability of each locus (gene or regulatory feature) to be affected by different types of lesions based on a convolution of independent but non-identical Bernoulli distributions to determine whether a certain locus has an abundance of lesions that is statistically significant.In addition, FDR-adjusted q value is computed for each locus based on Pounds & Cheng (2006) estimator of the proportion of tests with a true null (pi.hat). The function also evaluates if a certain locus is affected by a constellation of multiple types of lesions and computes a p and adjusted q values for the locus to be affected by one type of lesions (p1), two types of lesions (p2), etc...
+#'
+#' This function estimates a p-value for each locus based on the probability of observing the observed number of lesions (or more) by chance, under a model where lesion events are treated as independent Bernoulli trials.
+#'
+#' For each lesion type, the model considers heterogeneity in lesion probability across loci based on their genomic context (e.g., locus size, chromosome size). These probabilities are then combined using a convolution of Bernoulli distributions to estimate the likelihood of observing the actual hit counts.
+#'
+#' In addition, the function calculates:
+#' - **FDR-adjusted q-values** using the method of Pounds and Cheng (2006), which estimates the proportion of true null hypotheses.
+#' - **p- and q-values for multi-lesion constellation hits**, i.e., the probability that a locus is affected by one (\code{p1}), two (\code{p2}), or more types of lesions simultaneously.
 #'
 #' @return
 #' A list with the following components:
-#' \item{gene.hits}{data table of GRIN results that include gene annotation, number of subjects affected by each lesion type for example gain, loss, mutation, etc.., and number of hits affecting each locus. The GRIN results table will also include P and FDR adjusted q-values showing the probability of each locus of being affected by one or a constellation of multiple types of lesions.}
-#' \item{lsn.data}{input lesion data}
-#' \item{gene.data}{input gene annotation data}
-#' \item{gene.lsn.data}{each row represent a gene overlapped by a certain lesion. Column "gene" shows the overlapped gene ensembl ID and "ID"" column has the patient ID.}
-#' \item{chr.size}{data table showing the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs.}
-#' \item{gene.index}{data.frame with overlapped gene-lesion data rows that belong to each chromosome in the gene.lsn.data table.}
-#' \item{lsn.index}{data.frame that shows the overlapped gene-lesion data rows taht belong to each lesion in the gene.lsn.data table.}
+#' \item{gene.hits}{A `data.frame` containing GRIN statistical results. Includes gene annotations, the number of subjects and hits by lesion type, and the computed p-values and FDR-adjusted q-values for lesion enrichment across one or more lesion types.}
+#' \item{lsn.data}{Original input lesion data.}
+#' \item{gene.data}{Original input gene annotation data.}
+#' \item{gene.lsn.data}{A `data.frame` in which each row corresponds to a gene overlapped by a specific lesion. Includes columns for Ensembl gene ID (\code{gene}) and patient/sample ID (\code{ID}).}
+#' \item{chr.size}{Chromosome size information used in the computation.}
+#' \item{gene.index}{A `data.frame` indexing rows in `gene.lsn.data` corresponding to each chromosome.}
+#' \item{lsn.index}{A `data.frame` indexing rows in `gene.lsn.data` corresponding to each lesion.}
 #'
 #' @export
 #'
 #' @importFrom stats pbeta p.adjust
 #'
 #' @references
-#' Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+#' Pounds, S. et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 #'
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
+
 #'
-#' @seealso [prep.gene.lsn.data()], [find.gene.lsn.overlaps()], [count.hits()]
+#' @seealso \code{\link{prep.gene.lsn.data}}, \code{\link{find.gene.lsn.overlaps}}, \code{\link{count.hits}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #'
-#' # prepare gene and lesion data for later computations:
-#' prep.gene.lsn=prep.gene.lsn.data(lesion.data,
-#'                                  hg19.gene.annotation)
+#' # 1) Prepare gene and lesion data:
+#' prep.gene.lsn <- prep.gene.lsn.data(lesion_data, hg38_gene_annotation)
 #'
-#' # determine lesions that overlap each gene (locus):
-#' gene.lsn.overlap=find.gene.lsn.overlaps(prep.gene.lsn)
+#' # 2) Identify overlapping gene-lesion events:
+#' gene.lsn.overlap <- find.gene.lsn.overlaps(prep.gene.lsn)
 #'
-#' # count number of subjects affected by different types of lesions and number of hits that affect
-#' # each locus:
-#' count.subj.hits=count.hits(gene.lsn.overlap)
+#' # 3) Count number of subjects and lesions affecting each gene:
+#' count.subj.hits <- count.hits(gene.lsn.overlap)
 #'
-#' # compute the probability of each locus to be affected by one or a constellation of multiple
-#' # types of lesion
-#' hits.prob=prob.hits(count.subj.hits, hg19.chrom.size)
+#' # 4) Compute p- and q-values for lesion enrichment per gene:
+#' hits.prob <- prob.hits(count.subj.hits, hg38_chrom_size)
 
 prob.hits=function(hit.cnt, # Output results of the count.hits function
                    chr.size=NULL) # A data table showing the size of the 22 autosomes, in addition to X and Y chromosomes in base pairs. data.frame should has two columns "chrom" with the chromosome number and "size" for the size of the chromosome in base pairs
@@ -152,18 +158,18 @@ prob.hits=function(hit.cnt, # Output results of the count.hits function
       lsn.subj.IDs=hit.cnt$lsn.data$ID[lsn.rows]
       pr.subj=row.prob.subj.hit(pr.gene.hit,lsn.subj.IDs)
 
-      max.nsubj=max(hit.cnt$nsubj.mtx[gene.rows,lsn.type])
-      max.nhit=max(hit.cnt$nhit.mtx[gene.rows,lsn.type])
+      #max.nsubj=max(hit.cnt$nsubj.mtx[gene.rows,lsn.type])
+      #max.nhit=max(hit.cnt$nhit.mtx[gene.rows,lsn.type])
 
-      pr.nhit=row.bern.conv(pr.gene.hit,max.nhit)
-      pr.nsubj=row.bern.conv(pr.subj,max.nsubj)
+      #pr.nhit=row.bern.conv(pr.gene.hit,max.nhit) # in original GRIN library
+      #pr.nsubj=row.bern.conv(pr.subj,max.nsubj)   # in original GRIN library
 
       for (j in 1:n.genes)
       {
         nsubj=hit.cnt$nsubj.mtx[gene.rows[j],lsn.type]
         nhit=hit.cnt$nhit.mtx[gene.rows[j],lsn.type]
-        p.nsubj[gene.rows[j],lsn.type]=sum(pr.nsubj[j,(nsubj+1):(max.nsubj+1)])
-        p.nhit[gene.rows[j],lsn.type]=sum(pr.nhit[j,(nhit+1):(max.nhit+1)])
+        p.nsubj[gene.rows[j],lsn.type]=rpbc(nsubj,pr.subj[j,])
+        p.nhit[gene.rows[j],lsn.type]=rpbc(nhit,pr.gene.hit[j,])
       }
     }
 

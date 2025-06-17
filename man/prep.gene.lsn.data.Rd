@@ -2,47 +2,60 @@
 % Please edit documentation in R/prep.gene.lsn.data.R
 \name{prep.gene.lsn.data}
 \alias{prep.gene.lsn.data}
-\title{Prepare Gene and Lesion Data}
+\title{Prepare Gene and Lesion Data for GRIN Analysis}
 \usage{
 prep.gene.lsn.data(lsn.data, gene.data, mess.freq = 10)
 }
 \arguments{
-\item{lsn.data}{data.frame with lesion data prepared by the user in a GRIN compatible format. The data.frame should has five columns that include "ID" which is the patient ID, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion type for example gain, loss, mutation, fusion, etc...}
+\item{lsn.data}{A \code{data.frame} containing lesion data in GRIN-compatible format. Must include the following five columns:
+\describe{
+\item{ID}{Unique patient identifier.}
+\item{chrom}{Chromosome on which the lesion is located.}
+\item{loc.start}{Start position of the lesion in base pairs.}
+\item{loc.end}{End position of the lesion in base pairs.}
+\item{lsn.type}{Type of lesion (e.g., gain, loss, mutation, fusion, etc...).}
+}}
 
-\item{gene.data}{gene annotation data with four required columns: "gene" has ensembl ID, "chrom" which is chromosome on which the gene is located, "loc.start" gene start position, "loc.end" which is the gene end position}
+\item{gene.data}{A \code{data.frame} containing gene annotation data with the following four required columns:
+\describe{
+\item{gene}{Ensembl gene ID.}
+\item{chrom}{Chromosome on which the gene is located.}
+\item{loc.start}{Start position of the gene in base pairs.}
+\item{loc.end}{End position of the gene in base pairs.}
+}}
 
-\item{mess.freq}{message frequency: display message every mess.freq^th lesion block (default is 10).}
+\item{mess.freq}{Integer specifying the frequency at which progress messages are displayed. Messages are printed every \code{mess.freq}-th lesion block processed (default is 10).}
 }
 \value{
 A list with the following components:
-\item{lsn.data}{Input lesion data.}
-\item{gene.data}{Input gene annotation data.}
-\item{gene.lsn.data}{data.frame ordered by gene and lesions start positions. Gene start position is coded as 1 in the cty column and gene end position is coded as 4. Lesion start position is coded as 2 in the cty column and lesion end position is coded as 3.}
-\item{gene.index}{data.frame that shows row start and row end for each chromosome in the gene.lsn.data table.}
-\item{lsn.index}{data.frame that shows row start and row end for each lesion in the gene.lsn.data table.}
+\describe{
+\item{lsn.data}{Original lesion data.}
+\item{gene.data}{Original gene annotation data.}
+\item{gene.lsn.data}{Combined and ordered data.frame of gene and lesion intervals. The \code{cty} column encodes position type: 1 = gene start, 2 = lesion start, 3 = lesion end, 4 = gene end.}
+\item{gene.index}{Index data.frame indicating the start and end rows for each chromosome within \code{gene.lsn.data} for genes.}
+\item{lsn.index}{Index data.frame indicating the start and end rows for each lesion (grouped by type, chromosome, and subject) within \code{gene.lsn.data}.}
+}
 }
 \description{
-This function prepare gene and lesion data for later GRIN computations.
+Prepares and indexes gene and lesion data for downstream GRIN (Genomic Random Interval) analysis. This function merges and orders gene and lesion coordinates to support efficient computation of overlaps between genes and all different types of genomic lesions (structural or sequence lesions).
 }
 \details{
-This function order and index gene and lesion data for later computations. Output of this function is used to ovelap gene and lesion data using find.gene.lsn.overlaps function.
+This function performs pre-processing by ordering and indexing both gene and lesion data. It combines gene and lesion coordinates into a unified structure, marking each with a specific code (\code{cty}) that identifies whether the row represents a gene or lesion. This merged data is then used in the \code{find.gene.lsn.overlaps()} function to detect gene-lesion overlaps.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
+data(lesion_data)
+data(hg38_gene_annotation)
 
-# prepare gene and lesion data for later computations:
-prep.gene.lsn=prep.gene.lsn.data(lesion.data,
-                                 hg19.gene.annotation)
+# Prepare gene and lesion data for GRIN analysis:
+prep.gene.lsn <- prep.gene.lsn.data(lesion_data, hg38_gene_annotation)
 }
 \references{
-Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
-
+Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=order.index.gene.data]{order.index.gene.data()}}, \code{\link[=order.index.lsn.data]{order.index.lsn.data()}}
+\code{\link{order.index.gene.data}}, \code{\link{order.index.lsn.data}}, \code{\link{find.gene.lsn.overlaps}}
 }
 \author{
-{Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

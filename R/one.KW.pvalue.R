@@ -1,6 +1,6 @@
 
 # one.KW.pvalue: Function Computes the KW p-value for one row of the lesion data matrix
-# paired with one row of the expression data matrix
+# paired with one row of the expression data matrix.
 
 one.KW.pvalue=function(one.row.mtch,      # one row of the row.mtch matrix (output of the alex.prep.lsn.expr function)
                        expr.mtx,          # expression data matrix (alex.expr, output of the alex.prep.lsn.expr function)

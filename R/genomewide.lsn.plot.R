@@ -2,19 +2,24 @@
 #' Genome-wide Lesion Plot
 #'
 #' @description
-#' Function return a genomewide lesion plot for all lesion types affecting different chromosomes.
+#' Generates a genome-wide lesion plot displaying all lesion types affecting different chromosomes.
 #'
-#' @param grin.res GRIN results (output of the grin.stats function).
-#' @param ordered By default the function will order the patient IDs alphabetically. However, users can specify a certain patient's order in the genomewide lesion plot by specifying ordered=TRUE and pass a data frame with new patient's order to the pt.order argument.
-#' @param pt.order data.frame of two columns "ID" that has patient IDs matching the unique IDs in the lesion data file and "pts.order" that has the new patient's order listed as numbers that range from 1:n.patients (Should be only specified if ordered=TRUE).
-#' @param lsn.colors a vector of lesion colors (If not provided by the user, colors will be automatically assigned using default.grin.colors function).
-#' @param max.log10q Maximum log10 q value for genes in the GRIN results table to be added to the plot. If max.log10q=100 for example, all -log10q values>100, will be adjusted to 100 in the plot.
+#' @param grin.res GRIN results (output from the `grin.stats` function).
+#' @param ordered Logical; if `TRUE`, patient IDs will be reordered according to the `pt.order` data frame. If `FALSE` (default), patient IDs are ordered alphabetically.
+#' @param pt.order A data frame with two columns: `"ID"` (patient identifiers matching those in the lesion data) and `"pts.order"` (numeric vector specifying the new patient order from 1 to n patients). Only required if `ordered = TRUE`.
+#' @param lsn.colors A named vector of colors assigned to lesion types. If not provided, colors will be automatically assigned using the `default.grin.colors` function.
+#' @param max.log10q Numeric; maximum value for -log10(q-value) used in the plot. Any value greater than `max.log10q` will be capped at this value in the left panel of the plot.
 #'
 #' @details
-#' The function use the genome-wide plotting coordinates obtained from the compute.gw.coordinates function and plot the whole set of lesions affecting subjects included in the dataset in the middle panel of the figure. Two additional side panels show the number of affected subjects and -log10 q value of each locus to be affected by all different types of lesions.
+#' This function uses genome-wide coordinates (from `compute.gw.coordinates`) to generate a three-panel plot. The middle panel shows lesions by chromosome across patients. The left panel displays the -log10(q-values) from the GRIN results for each gene, and the right panel shows the number of patients affected at each locus, color-coded by lesion type.
 #'
 #' @return
-#' The function return a genome-wide lesion plot (all chromosomes) in the middle panel. For each locus, Panel on the left shows -log10 q value and the Panel on the right show the number of subjects affected by all different types of lesions color coded by lesion category.
+#' A genome-wide lesion plot consisting of three aligned panels:
+#' \itemize{
+#'   \item Middle panel: genome-wide lesion map across all chromosomes and patients.
+#'   \item Left panel: -log10(q-values) of each locus from GRIN results showing Statistical Significance of Lesion Frequencies.
+#'   \item Right panel: number of affected patients at each locus, colored by lesion category.
+#' }
 #'
 #' @export
 #'
@@ -23,26 +28,23 @@
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [compute.gw.coordinates()]
+#' @seealso \code{\link{compute.gw.coordinates}}
 #'
 #' @examples
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
-#' data(hg19.chrom.size)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
+#' data(hg38_chrom_size)
 #'
-#' # Run GRIN model using grin.stats function
-#' grin.results=grin.stats(lesion.data,
-#'                         hg19.gene.annotation,
-#'                         hg19.chrom.size)
+#' # Run GRIN analysis
+#' grin.results <- grin.stats(lesion_data,
+#'                            hg38_gene_annotation,
+#'                            hg38_chrom_size)
 #'
-#' # prepare the genomewide lesion plot using genomewide.lsn.plot function with patient IDs ordered
-#' # alphabetically:
-#' genomewide.plot=genomewide.lsn.plot(grin.results, max.log10q=50)
-#'
-#' # To pass certain patients order to the genomewide.lsn.plot function, the user should specify
-#' # a certain patients order using the pt.order argument.
+#' # Generate genome-wide lesion plot with alphabetical patient ordering
+#' genomewide.plot <- genomewide.lsn.plot(grin.results, max.log10q = 50)
 
 genomewide.lsn.plot=function(grin.res,        # GRIN results (output of the grin.stats function)
                              ordered=FALSE,   # user can specify a certain patients order in the genowide lesion plot by specifying ordered = TRUE and pass pts.order data.frame with the new patients order , otherwise patients will be ordered alphabetically
@@ -60,10 +62,11 @@ genomewide.lsn.plot=function(grin.res,        # GRIN results (output of the grin
     n.chr=nrow(grin.res$chr.size)
   } else {
     ordered.pts=pt.order
+    n=max(ordered.pts$pts.order)
     lesions=grin.res$lsn.data
     merged.data=merge(ordered.pts,lesions,by="ID", all.y=TRUE)
     grin.res$lsn.data=merged.data
-    n=max(grin.res$lsn.data$pts.order)
+
     n.chr=nrow(grin.res$chr.size)
   }
 

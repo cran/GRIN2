@@ -2,17 +2,19 @@
 #' Get Chromosome Length
 #'
 #' @description
-#' Retrieve chromosome size data from chr.info txt files available on the UCSC genome browser based on the user specified genome assembly.
+#' Retrieves chromosome size data for the human GRCh38 (hg38) genome assembly using UCSC `chromInfo` data, accessed via the `circlize` package.
 #'
-#' @param genome.assembly User can specify one of four supported genome assemblies that include "Human_GRCh38", "Human_GRCh37", "Mouse_HGCm39" and "Mouse_HGCm38".
+#' @param genome.assembly Character string specifying the genome assembly. Currently, only `"Human_GRCh38"` is supported.
 #'
 #' @details
-#' Based on the genome assembly specified by the user, the function will directly retrieve chromosome size data from chr.info txt file available on the UCSC genome browser.
+#' The function fetches chromosome size information from the UCSC genome browser via the `circlize::read.chromInfo()` function. It returns data for all 22 autosomes in addition to X and Y chromosomes in the human GRCh38 (hg38) assembly. Chromosome names are formatted without the `"chr"` prefix.
 #'
 #' @return
-#' A data table with the following two columns:
-#' \item{chrom}{column has the chromosome number denoted as 1, 2, X, Y, etc..}
-#' \item{size}{column has the chromosome size in base pairs.}
+#' A data frame with the following columns:
+#' \describe{
+#'   \item{chrom}{Chromosome identifier (e.g., 1, 2, ..., X, Y).}
+#'   \item{size}{Chromosome size in base pairs.}
+#' }
 #'
 #' @export
 #'
@@ -21,62 +23,33 @@
 #' @references
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
-#' @seealso [circlize::read.chromInfo()]
+#' @seealso \code{\link[circlize]{read.chromInfo}}
 #'
 #' @examples
-#' # To retreive chromosome size data for hg19 genome assembly:
-#' hg19.chrom.size=get.chrom.length("Human_GRCh37")
-#' # "Human_GRCh38" can be used to retreive chromosome size data for hg38 genome assembly.
+#' # Retrieve chromosome size data for the GRCh38 genome assembly
+#' hg38.chrom.size <- get.chrom.length("Human_GRCh38")
 
-get.chrom.length=function(genome.assembly)   # function support four genome assemblies that include "Human_GRCh38", "Human_GRCh37", "Mouse_HGCm39" and "Mouse_HGCm38"
-{
-  # retrieve chromosome size data for GRCh38 (hg38) genome build
-  if (genome.assembly=="Human_GRCh38")
-  {
-    chr.size.hg38= circlize::read.chromInfo(species = "hg38")
-    chr.size.hg38=as.data.frame(chr.size.hg38)
-    chr.size=cbind.data.frame(chrom=chr.size.hg38$chromosome,
-                              size=chr.size.hg38$chr.len)
-    chr.size$chrom<-gsub("chr","",as.character(chr.size$chrom))
-
-    return(chr.size)
+get.chrom.length <- function(genome.assembly) {
+  # Check for required package
+  if (!requireNamespace("circlize", quietly = TRUE)) {
+    message("Package 'circlize' is not installed. Please install it using install.packages('circlize')")
+    return(NULL)
   }
 
-  # retrieve chromosome size data for GRCh37 (hg19) genome build
-  if (genome.assembly=="Human_GRCh37")
-  {
-    chr.size.hg19= circlize::read.chromInfo(species = "hg19")
-    chr.size.hg19=as.data.frame(chr.size.hg19)
-    chr.size=cbind.data.frame(chrom=chr.size.hg19$chromosome,
-                              size=chr.size.hg19$chr.len)
-    chr.size$chrom<-gsub("chr","",as.character(chr.size$chrom))
-
-    return(chr.size)
+  # Check supported genome assembly
+  if (genome.assembly != "Human_GRCh38") {
+    stop("Unsupported genome assembly. Only 'Human_GRCh38' is currently supported.")
   }
 
-  # retrieve chromosome size data for Mouse_HGCm39 (mm39) genome build
-  if (genome.assembly=="Mouse_HGCm39")
-  {
-    chr.size.mm39= circlize::read.chromInfo(species = "mm39")
-    chr.size.mm39=as.data.frame(chr.size.mm39)
-    chr.size=cbind.data.frame(chrom=chr.size.mm39$chromosome,
-                              size=chr.size.mm39$chr.len)
-    chr.size$chrom<-gsub("chr","",as.character(chr.size$chrom))
+  # Retrieve chromosome sizes using circlize
+  chr.size.hg38 <- circlize::read.chromInfo(species = "hg38")
+  chr.size <- data.frame(
+    chrom = gsub("chr", "", as.character(chr.size.hg38$chromosome)),
+    size = chr.size.hg38$chr.len
+  )
 
-    return(chr.size)
-  }
-
-  # retrieve chromosome size data for Mouse_HGCm38 (mm10) genome build
-  if (genome.assembly=="Mouse_HGCm38")
-  {
-    chr.size.mm38= circlize::read.chromInfo(species = "mm10")
-    chr.size.mm38=as.data.frame(chr.size.mm38)
-    chr.size=cbind.data.frame(chrom=chr.size.mm38$chromosome,
-                              size=chr.size.mm38$chr.len)
-    chr.size$chrom<-gsub("chr","",as.character(chr.size$chrom))
-
-    return(chr.size)
-  }
+  return(chr.size)
 }

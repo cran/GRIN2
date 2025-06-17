@@ -1,29 +1,37 @@
 
-#' Order Index Lesion Data
+#' Order and Index Lesion Data
 #'
 #' @description
-#' This function order and index lesion data by lesion type, the chromosome on which the lesion is located , and subject.
+#' This function orders and indexes lesion data by lesion type, chromosome, and subject ID. It prepares lesion data for downstream GRIN analysis by structuring it in a way that facilitates efficient access and overlap computations.
 #'
-#' @param lsn.data data.frame with lesion data prepared by the user in a GRIN compatible format. The data.frame should has five columns that include "ID" which is a column with id of the patient affected by the lesion, "chrom" which is the chromosome on which the lesion is located, "loc.start" which is the lesion start position, "loc.end" the lesion end position and "lsn.type" which is the lesion type for example gain, loss, mutation, fusion, etc...
+#' @param lsn.data A `data.frame` containing lesion data formatted for GRIN. It must include the following five columns:
+#' \describe{
+#'   \item{"ID"}{Patient identifier.}
+#'   \item{"chrom"}{Chromosome on which the lesion is located.}
+#'   \item{"loc.start"}{Start position of the lesion.}
+#'   \item{"loc.end"}{End position of the lesion.}
+#'   \item{"lsn.type"}{Lesion type (e.g., gain, loss, mutation, fusion, etc...).}
+#' }
 #'
 #' @return
-#' A list with the following components:
-#' \item{lsn.data}{Input lesion data}
-#' \item{lsn.index}{data.frame with row start and row end for each type of lesions affecting each subject on a certain chromosome. For example, if a certain patient is affected by 1 deletion on chromosome 5, row start wil be equal to row end for loss on chromosome 5. However, if the patient is affected by 4 deletions, difference between row.start and row.end will be 3.}
+#' A list with two elements:
+#' \item{lsn.data}{The input lesion data, ordered by lesion type, chromosome, and subject.}
+#' \item{lsn.index}{A `data.frame` with two columns, `row.start` and `row.end`, indicating the index range of lesions for each subject-lesion type-chromosome combination. For example, if a patient has a single deletion on chromosome 5, `row.start` will equal `row.end`. If there are four deletions, the range will span four rows.}
 #'
 #' @export
 #'
 #' @references
-#' Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+#' Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 #'
 #' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @author {Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
 #' @examples
-#' data(lesion.data)
+#' data(lesion_data)
 #'
-#' ordered.lsn=order.index.lsn.data(lesion.data)
+#' ordered.lsn <- order.index.lsn.data(lesion_data)
 
 order.index.lsn.data=function(lsn.data)  # lesion data provided by the user in a GRIN compatible format
 

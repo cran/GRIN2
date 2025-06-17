@@ -3,25 +3,26 @@
 \docType{data}
 \name{pathways}
 \alias{pathways}
-\title{List of Genes Annotated to a Group of Pathways}
+\title{Genes Annotated to Biological Pathways}
 \format{
 \subsection{\code{pathways}}{
 
 A data frame with 121 rows and 3 columns:
 \describe{
 \item{gene.name}{Gene symbol.}
-\item{ensembl.id}{Gene ensembl ID.}
-\item{pathway}{The pathway to which the gene is annotated.}
+\item{ensembl.id}{Ensembl gene ID.}
+\item{pathway}{Biological pathway to which the gene is annotated.}
 }
 }
 }
 \source{
-Data was extracted from the supplementary material tables of the published Liu, Yu, et al. (2017) manuscript \url{https://www.nature.com/articles/ng.3909#Sec27}
+Extracted from the supplementary materials of Liu, Yu, et al. (2017)
+\url{https://www.nature.com/articles/ng.3909#Sec27}
 }
 \usage{
 pathways
 }
 \description{
-The dataset has a list of genes annotated to a group of different pathways.
+A dataset listing genes annotated to various biological pathways, as reported in Liu, Yu, et al. (2017).
 }
 \keyword{datasets}

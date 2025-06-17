@@ -7,30 +7,31 @@
 get.chrom.length(genome.assembly)
 }
 \arguments{
-\item{genome.assembly}{User can specify one of four supported genome assemblies that include "Human_GRCh38", "Human_GRCh37", "Mouse_HGCm39" and "Mouse_HGCm38".}
+\item{genome.assembly}{Character string specifying the genome assembly. Currently, only \code{"Human_GRCh38"} is supported.}
 }
 \value{
-A data table with the following two columns:
-\item{chrom}{column has the chromosome number denoted as 1, 2, X, Y, etc..}
-\item{size}{column has the chromosome size in base pairs.}
+A data frame with the following columns:
+\describe{
+\item{chrom}{Chromosome identifier (e.g., 1, 2, ..., X, Y).}
+\item{size}{Chromosome size in base pairs.}
+}
 }
 \description{
-Retrieve chromosome size data from chr.info txt files available on the UCSC genome browser based on the user specified genome assembly.
+Retrieves chromosome size data for the human GRCh38 (hg38) genome assembly using UCSC \code{chromInfo} data, accessed via the \code{circlize} package.
 }
 \details{
-Based on the genome assembly specified by the user, the function will directly retrieve chromosome size data from chr.info txt file available on the UCSC genome browser.
+The function fetches chromosome size information from the UCSC genome browser via the \code{circlize::read.chromInfo()} function. It returns data for all 22 autosomes in addition to X and Y chromosomes in the human GRCh38 (hg38) assembly. Chromosome names are formatted without the \code{"chr"} prefix.
 }
 \examples{
-# To retreive chromosome size data for hg19 genome assembly:
-hg19.chrom.size=get.chrom.length("Human_GRCh37")
-# "Human_GRCh38" can be used to retreive chromosome size data for hg38 genome assembly.
+# Retrieve chromosome size data for the GRCh38 genome assembly
+hg38.chrom.size <- get.chrom.length("Human_GRCh38")
 }
 \references{
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[circlize:read.chromInfo]{circlize::read.chromInfo()}}
+\code{\link[circlize]{read.chromInfo}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

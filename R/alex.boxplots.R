@@ -1,17 +1,17 @@
 
-#' Prepare Box Plots of Expression Data by Lesion Groups
+#' Generate Box Plots of Gene Expression by Lesion Groups
 #'
 #' @description
-#' Function return box plots for expression data by lesion groups for selected number of genes based on a specified q-value of the kruskal-wallis test results.
+#' Generates box plots of gene expression levels stratified by lesion groups for a subset of genes selected based on a user-specified q-value threshold from Kruskal Wallis test results.
 #'
-#' @param out.dir Path to the folder where the boxplots of selected genes based on the specified q value of the KW results table will be added.
-#' @param alex.data Output of the alex.prep.lsn.expr function. It's a list of three data tables that include "row.mtch", "alex.expr" with expression data, "alex.lsn" with lesion data. Rows of alex.expr, and "alex.lsn" matrices are ordered by gene ensembl IDs and the columns are ordered by patient ID.
-#' @param alex.kw.results ALEX Kruskal-Wallis test results (output of the KW.hit.express function).
-#' @param q minimum q value for a gene to be included in output PDF file of box plots.
-#' @param gene.annotation Gene annotation data either provided by the user or retrieved from ensembl BioMart database using get.ensembl.annotation function included in the GRIN2.0 library. Data.frame should has four columns: "gene" which is the ensembl ID of annotated genes, "chrom" which is the chromosome on which the gene is located, "loc.start" which is the gene start position, and "loc.end" the gene end position.
+#' @param out.dir Path to the directory where the resulting PDF file containing the box plots will be saved.
+#' @param alex.data A list returned by the \code{alex.prep.lsn.expr} function, containing three components: \code{"row.mtch"}, \code{"alex.expr"} (gene expression matrix), and \code{"alex.lsn"} (lesion matrix). Rows of \code{alex.expr} and \code{alex.lsn} is ordered by Ensembl gene IDs; columns represent patient IDs.
+#' @param alex.kw.results Output of the \code{KW.hit.express} function containing Kruskal Wallis test results.
+#' @param q Q-value threshold. Only genes with q-values below this threshold will be included in the output plots.
+#' @param gene.annotation A \code{data.frame} containing gene annotation data, either provided by the user or retrieved using \code{get.ensembl.annotation}. Must contain four columns: \code{"gene"} (Ensembl gene ID), \code{"chrom"} (chromosome), \code{"loc.start"} (start position), and \code{"loc.end"} (end position).
 #'
 #' @return
-#' Function return a PDF file with box plots for expression data by lesion groups for selected number of genes based on a specified q-value of the kruskal-wallis test results (one gene per page).
+#' A PDF file saved in \code{out.dir}, containing one box plot per page for each selected gene, showing gene expression distribution across lesion groups.
 #'
 #' @export
 #'
@@ -19,33 +19,33 @@
 #' @importFrom forcats fct_reorder
 #' @importFrom grDevices dev.off pdf
 #'
-#' @author {Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+#' @author
+#' Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 #'
 #' @references
-#' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023) Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
+#' Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 #'
-#' @seealso [alex.prep.lsn.expr()], [KW.hit.express()]
+#' @seealso \code{\link{alex.prep.lsn.expr}}, \code{\link{KW.hit.express}}
 #'
 #' @examples
-#' data(expr.data)
-#' data(lesion.data)
-#' data(hg19.gene.annotation)
+#' data(expr_data)
+#' data(lesion_data)
+#' data(hg38_gene_annotation)
 #'
-#' # prepare expression, lesion data and return the set of genes with both types of data available
-#' # ordered by gene IDs in rows and patient IDs in columns:
-#' alex.data=alex.prep.lsn.expr(expr.data, lesion.data,
-#'                              hg19.gene.annotation, min.expr=5, min.pts.lsn=5)
+#' # Prepare expression and lesion data
+#' alex.data <- alex.prep.lsn.expr(expr_data, lesion_data,
+#'                                 hg38_gene_annotation, min.expr = 5, min.pts.lsn = 5)
 #'
-#' # run KW test for association between lesion groups and expression level of the same gene:
-#' alex.kw.results=KW.hit.express(alex.data, hg19.gene.annotation, min.grp.size=5)
+#' # Run Kruskal Wallis test
+#' alex.kw.results <- KW.hit.express(alex.data, hg38_gene_annotation, min.grp.size = 5)
 #'
-#' # return boxplots for a list of top significant genes to a pre-specified folder using 'out.dir':
+#' # Generate box plots for significant genes
 #' dir.create(resultsFolder <- file.path(tempdir(), "temp.out"))
-#'
-#' boxplots=alex.boxplots(out.dir=resultsFolder,
-#'                        alex.data, alex.kw.results,
-#'                        1e-15, hg19.gene.annotation)
-#'
+#' alex.boxplots(out.dir = resultsFolder,
+#'               alex.data = alex.data,
+#'               alex.kw.results = alex.kw.results,
+#'               q = 1e-15,
+#'               gene.annotation = hg38_gene_annotation)
 #' unlink(resultsFolder, recursive = TRUE)
 
 alex.boxplots=function(out.dir,            # Path to the folder where the boxplots of selected genes based on the specified q value of the KW results table will be added

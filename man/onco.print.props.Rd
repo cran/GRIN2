@@ -2,36 +2,57 @@
 % Please edit documentation in R/onco.print.props.R
 \name{onco.print.props}
 \alias{onco.print.props}
-\title{Oncoprint proportions}
+\title{Oncoprint Proportions by Lesion Type}
 \usage{
 onco.print.props(lsn.data, clr = NULL, hgt = NULL)
 }
 \arguments{
-\item{lsn.data}{data.frame with 5 columns including "ID" which is the subject identifier, "chrom" which is the chromosome on which the lesion is located, "loc.start" with lesion start position, "loc.end" which is the lesion end position), and "lsn.type" which is the lesion category for example gain, mutation, etc..).}
+\item{lsn.data}{A data frame with five columns:
+\itemize{
+\item \code{ID}: Subject or patient identifier
+\item \code{chrom}: Chromosome on which the lesion is located
+\item \code{loc.start}: Start genomic position of the lesion
+\item \code{loc.end}: End genomic position of the lesion
+\item \code{lsn.type}: Lesion category (e.g., gain, mutation, fusion)
+}}
 
-\item{clr}{Lesion colors (If not provided by the user, colors will be automatically assigned using default.grin.colors function).}
+\item{clr}{Optional. A named vector of colors for each lesion type. If not provided, default colors will be assigned using \code{\link{default.grin.colors}}.}
 
-\item{hgt}{Manually assign the proportion of the oncoprint rectangle that should be color filled for each lesion group.}
+\item{hgt}{Optional. A named numeric vector specifying the proportion (height) of the oncoprint rectangle to be filled for each lesion type. If not provided, proportions will be determined automatically based on average lesion sizes.}
 }
 \value{
-Function return a list of three lists specifying the color assigned to each lesion type, the proportion of the rectangle that should be color filled in the oncoprint based on the average size of each lesion type, and the legend parameters.
+A list with the following components:
+\itemize{
+\item \code{col}: Named vector of colors assigned to each lesion type
+\item \code{hgt}: Named vector of normalized proportions to fill for each lesion type
+\item \code{legend}: Legend parameters for use in oncoprint plots
+}
 }
 \description{
-The function order lesion types based on their average size and assign the proportion of the oncoprint rectangle that should be color filled based on the average size of each lesion type.
+Calculates and assigns the proportion of each oncoprint rectangle to be color-filled based on the average size of lesion types. Lesion types are ordered by their average genomic size, and proportions are either computed automatically or manually specified by the user.
 }
 \details{
-Some patients might be affected by two or more lesion types in the same gene for example gain AND mutations. To get all lesion types represented in the same rectangle in the oncoprint, this function order lesion types based on the average size of each type and assign the proportion of the oncoprint rectangle that should be color filled based on the average size of each lesion type. Color filled proportion of the oncoprint rectangles can be also specified by the user for  each lesion type based on the hgt parameter.
+In cases where a patient has multiple types of lesions (e.g., gain and mutation) in the same gene, this function ensures that all lesion types are visually represented within a single oncoprint rectangle.
+
+If \code{hgt} is not specified, lesion types are ranked by their average genomic size (calculated as \code{loc.end - loc.start + 1}), and the oncoprint proportions are derived accordingly. Smaller lesions (like point mutations) will occupy a smaller portion of the rectangle, while larger lesions (like CNVs) will occupy a larger portion.
+
+Alternatively, the user can manually define the fill proportions via the \code{hgt} parameter.
 }
 \examples{
-data(lesion.data)
-onco.props=onco.print.props(lesion.data, hgt = c("gain"=4, "loss"=3, "mutation"=2, "fusion"=1))
-# if hgt argument is not specified, the lesion category "mutation" for single point mutations will
-# be assigned size=1 because it has the smallest average lesion size and will have the smallest
-# proportion of the filled oncoprint rectangles 1/4=0.25
+data(lesion_data)
+
+# Automatically assign oncoprint proportions based on average lesion size:
+onco.props <- onco.print.props(lesion_data)
+
+# Alternatively, manually specify the oncoprint fill proportions for each lesion type:
+onco.props <- onco.print.props(lesion_data,
+                        hgt = c("gain" = 4, "loss" = 3, "mutation" = 2, "fusion" = 1))
 }
 \references{
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \author{
-{Lakshmi Patibandla \email{LakshmiAnuhya.Patibandla@stjude.org}, Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Lakshmi Patibandla \email{LakshmiAnuhya.Patibandla@stjude.org},
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org},
+Stanley Pounds \email{stanley.pounds@stjude.org}
 }

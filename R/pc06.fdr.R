@@ -1,6 +1,6 @@
 
 # pc06.fdr: Compute FDR with the Pounds & Cheng (2006) estimator of
-# the proportion of tests with a true null (pi.hat)
+# the proportion of tests with a true null (pi.hat).
 # Reference: https://pubmed.ncbi.nlm.nih.gov/16777905/
 
 pc06.fdr=function(p)

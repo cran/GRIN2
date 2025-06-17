@@ -7,42 +7,50 @@
 prep.binary.lsn.mtx(ov.data, min.ngrp = 0)
 }
 \arguments{
-\item{ov.data}{list of six data.frames that represent the output results of the find.gene.lsn.overlaps function.}
+\item{ov.data}{A list of six \code{data.frame} objects representing the output from the \code{\link{find.gene.lsn.overlaps}} function.}
 
-\item{min.ngrp}{if specified, rows with number of patients affected by a specific type of lesion that's less than the specified number will be discarded (default is 0; function will return all genes affected by a lesion in at least one patient), for example if only one patient is affected by gain in MYB gene.}
+\item{min.ngrp}{Optional integer specifying the minimum number of patients that must be affected by a given gene-lesion combination to be retained in the output matrix. The default is \code{0}, which includes all combinations affecting at least one patient.}
 }
 \value{
-The function returns a binary lesion matrix with each row labelled as gene.ID_lesion.type and each column is a patient. Entry for each patient in the table will be denoted as 1 if the gene is affected by this specific type of lesion or 0 otherwise.
+A binary matrix (as a \code{data.frame}) where:
+\itemize{
+\item Rows correspond to gene-lesion combinations (\code{gene.ID_lesion.type}).
+\item Columns correspond to patient IDs.
+\item Entries are binary: \code{1} if the patient is affected by such a specific type of  lesion in that gene, \code{0} otherwise.
+}
 }
 \description{
-Prepares a lesion matrix with each gene affected by a certain type of lesion as a row and each patient as a column.
+Constructs a binary matrix representing the presence or absence of specific lesion types affecting individual genes across patients. Each row corresponds to a gene-lesion type combination, and each column corresponds to a patient.
 }
 \details{
-The function uses the output results of the find.gene.lsn.overlaps function and create a binary lesion matrix with each gene affected by certain lesion type as a row and each patient as a column. Rownames are labelled as gene.ID_lesion.type (for example: ENSG00000118513_gain for gains affecting MYB gene). The entry for each patient in the table will be denoted as 1 if the patient is affected by this specific type of lesion in the gene, for example gain in MYB gene (ENSG00000118513) or 0 otherwise.
+The function processes the overlap results from \code{\link{find.gene.lsn.overlaps}} and constructs a binary matrix with dimensions: (gene and lesion type) by patient.
+
+Each row is labeled using the format \code{<gene.ID>_<lesion.type>} (e.g., \code{ENSG00000118513_gain} for a gain affecting the MYB gene). For each gene-lesion combination, a patient receives a value of \code{1} if affected by that specific lesion type in the corresponding gene, and \code{0} otherwise.
+
+Rows representing rare lesions (i.e., affecting fewer patients than \code{min.ngrp}) are excluded from the final matrix if \code{min.ngrp > 0}.
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
+data(lesion_data)
+data(hg38_gene_annotation)
 
-# prepare gene and lesion data for later computations:
-prep.gene.lsn=prep.gene.lsn.data(lesion.data,
-                                 hg19.gene.annotation)
+# 1) Prepare gene-lesion input data:
+prep.gene.lsn <- prep.gene.lsn.data(lesion_data,
+                                    hg38_gene_annotation)
 
-# determine lesions that overlap each gene (locus):
-gene.lsn.overlap=find.gene.lsn.overlaps(prep.gene.lsn)
+# 2) Identify gene-lesion overlaps:
+gene.lsn.overlap <- find.gene.lsn.overlaps(prep.gene.lsn)
 
-# prepare the lesion binary matrix with a minimum of 5 patients affected by the lesion to be
-# included in the final matrix:
-lsn.binary.mtx=prep.binary.lsn.mtx(gene.lsn.overlap, min.ngrp=5)
+# 3) Create binary lesion matrix including only lesion-gene pairs affecting >= 5 patients:
+lsn.binary.mtx <- prep.binary.lsn.mtx(gene.lsn.overlap, min.ngrp = 5)
 }
 \references{
-Pounds, Stan, et al. (2013) A genomic random interval model for statistical analysis of genomic lesion data.
+Pounds, S., et al. (2013). A genomic random interval model for statistical analysis of genomic lesion data.
 
 Cao, X., Elsayed, A. H., & Pounds, S. B. (2023). Statistical Methods Inspired by Challenges in Pediatric Cancer Multi-omics.
 }
 \seealso{
-\code{\link[=prep.gene.lsn.data]{prep.gene.lsn.data()}}, \code{\link[=find.gene.lsn.overlaps]{find.gene.lsn.overlaps()}}
+\code{\link{prep.gene.lsn.data}}, \code{\link{find.gene.lsn.overlaps}}
 }
 \author{
-{Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org}, Stanley Pounds \email{stanley.pounds@stjude.org}
 }

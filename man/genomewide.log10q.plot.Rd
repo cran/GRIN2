@@ -2,7 +2,7 @@
 % Please edit documentation in R/genomewide.log10q.plot.R
 \name{genomewide.log10q.plot}
 \alias{genomewide.log10q.plot}
-\title{Genomewide log10q Plot}
+\title{Genome-wide -log10(q-value) Plot}
 \usage{
 genomewide.log10q.plot(
   grin.res,
@@ -12,50 +12,45 @@ genomewide.log10q.plot(
 )
 }
 \arguments{
-\item{grin.res}{GRIN results evaluating annotated genes or lesion boundaries (output of the grin.stats function using either lesion boundaries or annotated genes as a marker input file).}
+\item{grin.res}{GRIN results object (output from \code{grin.stats}) using either gene annotation or lesion boundaries as marker input.}
 
-\item{lsn.grps}{Selected lesion groups to be added to the plot.}
+\item{lsn.grps}{A character vector specifying which lesion group(s) to include in the plot.}
 
-\item{lsn.colors}{Colors assigned to each lesion group (if NULL, lesion colors will be assigned automatically using default.grin.colors function).}
+\item{lsn.colors}{A named vector of colors corresponding to each lesion group. If \code{NULL}, default colors will be assigned using the \code{default.grin.colors()} function.}
 
-\item{max.log10q}{Maximum log10 q value to be added to the plot. All boundaries or genes with -log10 q smaller than this value will be set automatically to max.log10q.}
+\item{max.log10q}{Numeric; maximum value for -log10(q-value) displayed on the plot. Any value above this threshold will be capped at \code{max.log10q}.}
 }
 \value{
-The function return a genome-wide plot based on -log(10) q-value of each of the evaluated annotated genes or lesion boundaries to be affected by a certain type of lesions (gain, loss, mutation, etc...).
+A genome-wide plot showing -log10(q-values) for genes or lesion boundaries associated with specific lesion types.
 }
 \description{
-The function return a genome-wide plot based on -log(10) q-value of each of the evaluated annotated genes or lesion boundaries on each chromosome. The plot is lesion type specific (gain, loss, mutation, etc...).
+Generates a genome-wide plot of -log10(q-values) for each annotated gene or lesion boundary evaluated by GRIN. The plot is lesion-type specific (e.g., gain, loss, mutation).
+}
+\details{
+This function visualizes the significance of lesions affecting genomic loci across chromosomes. It plots -log10(q-values) for either gene-based or lesion-boundary markers based on the GRIN analysis. The plot is faceted or colored by lesion group (e.g., gain, loss).
 }
 \examples{
-data(lesion.data)
-data(hg19.gene.annotation)
-data(hg19.chrom.size)
+data(lesion_data)
+data(hg38_gene_annotation)
+data(hg38_chrom_size)
 
-# This analysis is lesion type specific. So, user should first data extract data for a specific
-# lesion group of interest for example gains from the lesion data file:
-gain=lesion.data[lesion.data$lsn.type=="gain",]
-# Return lesion boundaries for gains:
-lsn.bound.gain=grin.lsn.boundaries(gain, hg19.chrom.size)
-# Run GRIN analysis Using Lesion Boundaries as Markers Instead of the Gene Annotation File:
-GRIN.results.gain.bound=grin.stats(gain, lsn.bound.gain, hg19.chrom.size)
-# Return genomewide -log10q plot for association between lesion boundaries and gain:
-genomewide.log10q.plot(GRIN.results.gain.bound, lsn.grps=c("gain"),
-                       lsn.colors=c("gain" = "red"), max.log10q = 10)
+# Example 1: Use lesion boundaries for gains
+gain <- lesion_data[lesion_data$lsn.type == "gain", ]
+lsn.bound.gain <- grin.lsn.boundaries(gain, hg38_chrom_size)
+GRIN.results.gain.bound <- grin.stats(gain, lsn.bound.gain, hg38_chrom_size)
 
-# instead of lesion boundaries, users can also plot -log10q values for annotated genes using
-# genes annotation data as a marker data file:
-grin.results=grin.stats(lesion.data,
-                        hg19.gene.annotation,
-                        hg19.chrom.size)
-
-genomewide.log10q.plot(grin.results, lsn.grps=c("gain"), lsn.colors=c("gain" = "red"),
+genomewide.log10q.plot(GRIN.results.gain.bound,
+                       lsn.grps = c("gain"),
+                       lsn.colors = c("gain" = "red"),
                        max.log10q = 10)
 
-# User can run this same analysis for other lesion types such as mutations and deletions.
+# hg38_gene_annotation can be used instead of the boundaries as the marker data.
+
+# This function can be used similarly for other lesion types (e.g., loss, mutation).
 }
 \seealso{
-\code{\link[=grin.lsn.boundaries]{grin.lsn.boundaries()}}
+\code{\link{grin.lsn.boundaries}}
 }
 \author{
-{Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}}
+Abdelrahman Elsayed \email{abdelrahman.elsayed@stjude.org} and Stanley Pounds \email{stanley.pounds@stjude.org}
 }

@@ -1,5 +1,5 @@
 
-# oncoprint.legend: function specify name and colors of the oncoprint legend lesion groups
+# oncoprint.legend: function specify name and colors of the oncoprint legend lesion groups.
 
 oncoprint.legend = function(lsn.type){
   res <- list()
